@@ -10,13 +10,13 @@ This is a Model Context Protocol (MCP) server for Somark's document parsing API.
 
 ## Installation
 
-### Via npx (recommended)
+### Via npx from GitHub (recommended)
 
 ```bash
-npx somark_mcp
+npx -y github:SoMarkAI/somark_mcp
 ```
 
-### Via npm
+### Via npm (when published)
 
 ```bash
 npm install -g somark_mcp
@@ -26,8 +26,14 @@ somark_mcp
 ### From source
 
 ```bash
-# Clone or navigate to this directory
+# Clone the repository
+git clone https://github.com/SoMarkAI/somark_mcp.git
+cd somark_mcp
+
+# Install dependencies
 pnpm install
+
+# Build
 pnpm build
 
 # Run directly
@@ -46,14 +52,16 @@ export SOMARK_API_KEY="your-api-key-here"
 
 ### MCP Client Configuration
 
-When configuring the MCP server in your client (e.g., Claude Desktop, Cursor), add it to your MCP settings:
+When configuring the MCP server in your client (e.g., Claude Desktop, VS Code, Cursor), add it to your MCP settings:
+
+**Using GitHub repository (recommended):**
 
 ```json
 {
   "mcpServers": {
     "somark": {
       "command": "npx",
-      "args": ["-y", "somark_mcp"],
+      "args": ["-y", "github:SoMarkAI/somark_mcp"],
       "env": {
         "SOMARK_API_KEY": "your-api-key-here"
       }
@@ -62,13 +70,29 @@ When configuring the MCP server in your client (e.g., Claude Desktop, Cursor), a
 }
 ```
 
-Or if installed globally:
+**Using local installation:**
 
 ```json
 {
   "mcpServers": {
     "somark": {
       "command": "somark_mcp",
+      "env": {
+        "SOMARK_API_KEY": "your-api-key-here"
+      }
+    }
+  }
+}
+```
+
+**Using local source:**
+
+```json
+{
+  "mcpServers": {
+    "somark": {
+      "command": "node",
+      "args": ["/path/to/somark_mcp/build/index.js"],
       "env": {
         "SOMARK_API_KEY": "your-api-key-here"
       }
