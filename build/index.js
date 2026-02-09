@@ -70,12 +70,34 @@ async function somarkRequest(endpoint, options = {}) {
 // Create MCP server instance
 const server = new McpServer({ name: SERVER_NAME, version: SERVER_VERSION }, {
     instructions: "Somark MCP Server - Provides document parsing tools for converting PDF and images to markdown or JSON. " +
-        "If the API key is not configured, use the 'set_api_key' tool to ask the user for their API key. " +
+        "IMPORTANT: Before using extract_document tool, ALWAYS check if API key is configured by using check_api_key tool first. " +
+        "If API key is not configured, use the 'set_api_key' tool to ask the user for their API key. " +
         "Users can get their API key from https://somark.tech",
 });
 // ============================================
 // Tool Definitions
 // ============================================
+/**
+ * Tool: check_api_key
+ * Check if Somark API key is configured
+ */
+server.registerTool("check_api_key", {
+    title: "Check API Key Status",
+    description: "Check if Somark API key is configured. Use this before calling extract_document.",
+    inputSchema: z.object({}),
+}, async () => {
+    const isConfigured = apiKey !== null && apiKey.length > 0;
+    return {
+        content: [
+            {
+                type: "text",
+                text: isConfigured
+                    ? "✓ API key is configured and ready to use."
+                    : "✗ API key is not configured. Please use the 'set_api_key' tool to configure it. Get your API key from https://somark.tech",
+            },
+        ],
+    };
+});
 /**
  * Tool: set_api_key
  * Configure the Somark API key for authentication
@@ -257,6 +279,7 @@ async function main() {
     await server.connect(transport);
     console.error(`Somark MCP Server v${SERVER_VERSION} started.`);
     console.error(`Available tools:`);
+    console.error(`  - check_api_key: Check if API key is configured`);
     console.error(`  - set_api_key: Configure your Somark API key`);
     console.error(`  - extract_document: Parse PDF/images to markdown/JSON`);
 }
