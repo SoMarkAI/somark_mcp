@@ -177,7 +177,7 @@ server.registerTool(
     "extract_document",
     {
         title: "Extract Document",
-        description: "Parse PDF or image files (PNG, JPG, JPEG) to markdown or JSON format using Somark's document parsing API",
+        description: "Parse PDF or image files (PNG, JPG, JPEG, BMP, TIFF, JP2, DIB, PPM, PGM, PBM, GIF, HEIC, HEIF, WebP, XPM, TGA, DDS, XBM) to markdown or JSON format using Somark's document parsing API",
         inputSchema: z.object({
             file_path: z.string().describe("Absolute path to the PDF or image file to parse"),
             output_format: z.enum(["markdown", "json"]).default("markdown").describe("Output format: markdown or json"),
@@ -194,9 +194,13 @@ server.registerTool(
 
             // Check file extension
             const ext = path.extname(file_path).toLowerCase();
-            const allowedExtensions = ['.pdf', '.png', '.jpg', '.jpeg'];
+            const allowedExtensions = [
+                '.pdf', '.png', '.jpg', '.jpeg', '.bmp', '.tiff', '.tif',
+                '.jp2', '.dib', '.ppm', '.pgm', '.pbm', '.gif', '.heic',
+                '.heif', '.webp', '.xpm', '.tga', '.dds', '.xbm'
+            ];
             if (!allowedExtensions.includes(ext)) {
-                throw new Error(`Unsupported file format: ${ext}. Supported formats: PDF, PNG, JPG, JPEG`);
+                throw new Error(`Unsupported file format: ${ext}. Supported formats: PDF, PNG, JPG, JPEG, BMP, TIFF, JP2, DIB, PPM, PGM, PBM, GIF, HEIC, HEIF, WebP, XPM, TGA, DDS, XBM`);
             }
 
             // Read file as buffer
@@ -212,6 +216,22 @@ server.registerTool(
                 '.png': 'image/png',
                 '.jpg': 'image/jpeg',
                 '.jpeg': 'image/jpeg',
+                '.bmp': 'image/bmp',
+                '.tiff': 'image/tiff',
+                '.tif': 'image/tiff',
+                '.jp2': 'image/jp2',
+                '.dib': 'image/bmp',
+                '.ppm': 'image/x-portable-pixmap',
+                '.pgm': 'image/x-portable-graymap',
+                '.pbm': 'image/x-portable-bitmap',
+                '.gif': 'image/gif',
+                '.heic': 'image/heic',
+                '.heif': 'image/heif',
+                '.webp': 'image/webp',
+                '.xpm': 'image/x-xpixmap',
+                '.tga': 'image/x-tga',
+                '.dds': 'image/vnd-ms.dds',
+                '.xbm': 'image/x-xbitmap',
             };
             const mimeType = mimeTypes[ext] || 'application/octet-stream';
 

@@ -59,6 +59,20 @@ Somark MCP Server 是一个基于 Model Context Protocol (MCP) 的服务器，�
 - PDF (.pdf)
 - PNG (.png)
 - JPEG (.jpg, .jpeg)
+- BMP (.bmp, .dib)
+- TIFF (.tiff, .tif)
+- JPEG 2000 (.jp2)
+- Portable Pixmap (.ppm)
+- Portable Graymap (.pgm)
+- Portable Bitmap (.pbm)
+- GIF (.gif)
+- HEIC (.heic)
+- HEIF (.heif)
+- WebP (.webp)
+- X PixMap (.xpm)
+- Targa (.tga)
+- DirectDraw Surface (.dds)
+- X BitMap (.xbm)
 
 ## 开发注意事项
 

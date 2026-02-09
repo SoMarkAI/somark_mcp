@@ -42,7 +42,7 @@
 
 ### `extract_document`
 
-将 PDF 或图片文件（PNG、JPG、JPEG）解析为 Markdown 或 JSON 格式。
+将 PDF 或图片文件（PNG、JPG、JPEG、BMP、TIFF、JP2、DIB、PPM、PGM、PBM、GIF、HEIC、HEIF、WebP、XPM、TGA、DDS、XBM）解析为 Markdown 或 JSON 格式。
 
 | 参数 | 类型 | 必填 | 默认值 | 说明 |
 |------|------|------|--------|------|
@@ -51,7 +51,24 @@
 | `extract_images` | boolean | 否 | `false` | 是否提取文档中的图片 |
 | `language` | string | 否 | 自动检测 | 语言代码（如 `en`、`zh`、`ja`） |
 
-**支持的文件格式：** PDF (`.pdf`)、PNG (`.png`)、JPEG (`.jpg`、`.jpeg`)
+**支持的文件格式：** 
+- PDF (`.pdf`)
+- PNG (`.png`)
+- JPEG (`.jpg`、`.jpeg`)
+- BMP (`.bmp`、`.dib`)
+- TIFF (`.tiff`、`.tif`)
+- JPEG 2000 (`.jp2`)
+- Portable Pixmap (`.ppm`)
+- Portable Graymap (`.pgm`)
+- Portable Bitmap (`.pbm`)
+- GIF (`.gif`)
+- HEIC (`.heic`)
+- HEIF (`.heif`)
+- WebP (`.webp`)
+- X PixMap (`.xpm`)
+- Targa (`.tga`)
+- DirectDraw Surface (`.dds`)
+- X BitMap (`.xbm`)
 
 **使用示例：**
 
@@ -94,7 +111,7 @@ pnpm test:api         # API 连接测试
 |------|----------|
 | "API key not configured" | 在 MCP 客户端配置中添加 `SOMARK_API_KEY`，或使用 `set_api_key` 工具 |
 | 连接问题 | 检查 API Key 是否有效，确认 [somark.tech](https://somark.tech) 可以访问 |
-| 不支持的文件格式 | 仅支持 PDF、PNG、JPG 和 JPEG 格式 |
+| 不支持的文件格式 | 支持 PDF、PNG、JPG、JPEG、BMP、TIFF、JP2、DIB、PPM、PGM、PBM、GIF、HEIC、HEIF、WebP、XPM、TGA、DDS、XBM 格式 |
 
 ## 许可证
 

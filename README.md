@@ -42,7 +42,7 @@ Set or update the Somark API key at runtime (useful when the environment variabl
 
 ### `extract_document`
 
-Parse PDF or image files (PNG, JPG, JPEG) to Markdown or JSON format.
+Parse PDF or image files (PNG, JPG, JPEG, BMP, TIFF, JP2, DIB, PPM, PGM, PBM, GIF, HEIC, HEIF, WebP, XPM, TGA, DDS, XBM) to Markdown or JSON format.
 
 | Parameter | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
@@ -51,7 +51,24 @@ Parse PDF or image files (PNG, JPG, JPEG) to Markdown or JSON format.
 | `extract_images` | boolean | No | `false` | Whether to extract images from the document |
 | `language` | string | No | auto-detect | Language code (e.g., `en`, `zh`, `ja`) |
 
-**Supported file formats:** PDF (`.pdf`), PNG (`.png`), JPEG (`.jpg`, `.jpeg`)
+**Supported file formats:**
+- PDF (`.pdf`)
+- PNG (`.png`)
+- JPEG (`.jpg`, `.jpeg`)
+- BMP (`.bmp`, `.dib`)
+- TIFF (`.tiff`, `.tif`)
+- JPEG 2000 (`.jp2`)
+- Portable Pixmap (`.ppm`)
+- Portable Graymap (`.pgm`)
+- Portable Bitmap (`.pbm`)
+- GIF (`.gif`)
+- HEIC (`.heic`)
+- HEIF (`.heif`)
+- WebP (`.webp`)
+- X PixMap (`.xpm`)
+- Targa (`.tga`)
+- DirectDraw Surface (`.dds`)
+- X BitMap (`.xbm`)
 
 **Example usage:**
 
@@ -94,7 +111,7 @@ See [test/README.md](test/README.md) for details.
 |---------|----------|
 | "API key not configured" | Add `SOMARK_API_KEY` to your MCP client config, or use the `set_api_key` tool |
 | Connection issues | Check that your API key is valid and [somark.tech](https://somark.tech) is accessible |
-| Unsupported file format | Only PDF, PNG, JPG, and JPEG are supported |
+| Unsupported file format | Supports PDF, PNG, JPG, JPEG, BMP, TIFF, JP2, DIB, PPM, PGM, PBM, GIF, HEIC, HEIF, WebP, XPM, TGA, DDS, XBM formats |
 
 ## License
 
