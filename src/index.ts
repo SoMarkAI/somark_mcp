@@ -29,11 +29,20 @@ let apiKey: string | null = process.env.SOMARK_API_KEY || null;
 function requireApiKey(): string {
     if (!apiKey) {
         throw new Error(
-            "API key not configured. Please set the SOMARK_API_KEY environment variable " +
-            "or provide it via MCP settings. Get your API key from https://somark.tech"
+            "API key not configured. Please use the 'set_api_key' tool to configure your API key, " +
+            "or set the SOMARK_API_KEY environment variable. " +
+            "Get your API key from https://somark.tech"
         );
     }
     return apiKey;
+}
+
+/**
+ * Set API key
+ */
+function setApiKey(key: string): void {
+    apiKey = key;
+    console.error(`API key configured successfully.`);
 }
 
 /**
@@ -78,13 +87,59 @@ const server = new McpServer(
     { name: SERVER_NAME, version: SERVER_VERSION },
     {
         instructions: "Somark MCP Server - Provides document parsing tools for converting PDF and images to markdown or JSON. " +
-            "Get your API key from https://somark.tech",
+            "If the API key is not configured, use the 'set_api_key' tool to ask the user for their API key. " +
+            "Users can get their API key from https://somark.tech",
     }
 );
 
 // ============================================
 // Tool Definitions
 // ============================================
+
+/**
+ * Tool: set_api_key
+ * Configure the Somark API key for authentication
+ */
+server.registerTool(
+    "set_api_key",
+    {
+        title: "Set Somark API Key",
+        description: "Configure your Somark API key for document parsing. Get your API key from https://somark.tech",
+        inputSchema: z.object({
+            api_key: z.string().describe("Your Somark API key from https://somark.tech"),
+        }),
+    },
+    async ({ api_key }) => {
+        try {
+            if (!api_key || api_key.trim().length === 0) {
+                throw new Error("API key cannot be empty");
+            }
+
+            // Set the API key
+            setApiKey(api_key.trim());
+
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: "✓ API key configured successfully! You can now use the extract_document tool to parse documents.",
+                    },
+                ],
+            };
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: `Error setting API key: ${message}`,
+                    },
+                ],
+                isError: true,
+            };
+        }
+    }
+);
 
 /**
  * Tool: extract_document
@@ -249,9 +304,18 @@ server.registerTool(
 async function main() {
     // Check for API key on startup
     if (!apiKey) {
-        console.warn("WARNING: SOMARK_API_KEY environment variable not set.");
-        console.warn("Please set it before using the tools, or configure via MCP settings.");
-        console.warn("Get your API key from: https://somark.tech\n");
+        console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        console.error("⚠️  SOMARK_API_KEY environment variable not set.");
+        console.error("");
+        console.error("To use Somark MCP Server, you need an API key:");
+        console.error("1. Get your API key from: https://somark.tech");
+        console.error("2. Configure it using one of these methods:");
+        console.error("   • Use the 'set_api_key' tool (recommended for this session)");
+        console.error("   • Set environment variable: export SOMARK_API_KEY='your-key'");
+        console.error("");
+        console.error("Don't worry - I'll prompt you for the API key when needed!");
+        console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        console.error("");
     }
 
     // Connect using stdio transport
@@ -259,7 +323,9 @@ async function main() {
     await server.connect(transport);
 
     console.error(`Somark MCP Server v${SERVER_VERSION} started.`);
-    console.error(`Available tool: extract_document - Parse PDF/images to markdown/JSON`);
+    console.error(`Available tools:`);
+    console.error(`  - set_api_key: Configure your Somark API key`);
+    console.error(`  - extract_document: Parse PDF/images to markdown/JSON`);
 }
 
 main().catch((error) => {
