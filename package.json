@@ -1,25 +1,35 @@
 {
-  "name": "somark_mcp",
+  "name": "somark-mcp",
   "version": "1.0.0",
   "description": "MCP server for Somark document parsing API - converts PDF and images to markdown/JSON",
   "main": "build/index.js",
   "type": "module",
   "bin": {
-    "somark_mcp": "./build/index.js"
+    "somark-mcp": "build/index.js"
   },
   "scripts": {
     "build": "tsc && chmod 755 build/index.js",
-    "prepare": "npm run build",
     "test": "node test/test-mcp.js",
     "test:api": "node test/debug-test.js"
   },
-  "files": ["build", "src", "tsconfig.json"],
-  "keywords": ["mcp", "model-context-protocol", "somark", "pdf", "document-parsing", "ocr", "markdown"],
+  "files": [
+    "build",
+    "README.md"
+  ],
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "somark",
+    "pdf",
+    "document-parsing",
+    "ocr",
+    "markdown"
+  ],
   "author": "SoMarkAI",
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/SoMarkAI/somark_mcp.git"
+    "url": "git+https://github.com/SoMarkAI/somark_mcp.git"
   },
   "homepage": "https://github.com/SoMarkAI/somark_mcp#readme",
   "bugs": {

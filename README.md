@@ -15,7 +15,7 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server for **
   "mcpServers": {
     "somark": {
       "command": "npx",
-      "args": ["-y", "github:SoMarkAI/somark_mcp"],
+      "args": ["-y", "somark-mcp"],
       "env": {
         "SOMARK_API_KEY": "your-api-key-here"
       }

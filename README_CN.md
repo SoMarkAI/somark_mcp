@@ -15,7 +15,7 @@
   "mcpServers": {
     "somark": {
       "command": "npx",
-      "args": ["-y", "github:SoMarkAI/somark_mcp"],
+      "args": ["-y", "somark-mcp"],
       "env": {
         "SOMARK_API_KEY": "your-api-key-here"
       }
