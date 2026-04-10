@@ -18,8 +18,7 @@ const SERVER_NAME = 'somark_mcp'
 const SERVER_VERSION = '1.0.0'
 
 // Somark API configuration
-// const SOMARK_API_BASE = 'https://somark.tech/api/v1'
-const SOMARK_API_BASE = 'https://somark-sit.soulcode.cn/api/v1'
+const SOMARK_API_BASE = 'https://somark.tech/api/v1'
 
 // API Key storage (will be provided via environment variable)
 let apiKey: string | null = process.env.SOMARK_API_KEY || null
