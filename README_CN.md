@@ -2,7 +2,7 @@
 
 [English](README.md) | [中文](README_CN.md)
 
-基于 [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) 的 **Somark 文档解析服务器**，支持将 PDF 和图片文件高精度转换为 Markdown 或 JSON 格式。
+基于 [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) 的 **Somark 文档解析服务器**，支持将 PDF 和图片文件高精度解析为 Markdown、JSON、 SoMarkDown 格式，以及将解析结果打包为 ZIP。
 
 ## 快速开始
 
@@ -42,14 +42,29 @@
 
 ### `extract_document`
 
-将 PDF 或图片文件（PNG、JPG、JPEG、BMP、TIFF、JP2、DIB、PPM、PGM、PBM、GIF、HEIC、HEIF、WebP、XPM、TGA、DDS、XBM）解析为 Markdown 或 JSON 格式。
+将 PDF 或图片文件（PNG、JPG、JPEG、BMP、TIFF、JP2、DIB、PPM、PGM、PBM、GIF、HEIC、HEIF、WebP、XPM、TGA、DDS、XBM）解析为 `markdown`、`json`、 `somarkdown` 格式，以及将解析结果打包为 `zip`。
 
 | 参数 | 类型 | 必填 | 默认值 | 说明 |
 |------|------|------|--------|------|
 | `file_path` | string | 是 | — | PDF 或图片文件的绝对路径 |
-| `output_format` | `"markdown"` \| `"json"` | 否 | `"markdown"` | 输出格式 |
-| `extract_images` | boolean | 否 | `false` | 是否提取文档中的图片 |
-| `language` | string | 否 | 自动检测 | 语言代码（如 `en`、`zh`、`ja`） |
+| `output_formats` | `Array<"json" \| "markdown" \| "somarkdown" \| "zip">` | 是 | — | 输出格式列表。允许值：`json`、`markdown`、`somarkdown`、`zip`。不允许重复值。如果包含 `zip`，则只允许 `["zip"]`，或者同时包含 `json` 和 `zip` 的两个元素组合（顺序不限）。 |
+| `element_formats` | object | 否 | 见下文 | 元素渲染格式配置。 |
+| `feature_config` | object | 否 | 见下文 | 提取选项配置。 |
+
+**`element_formats` 字段：**
+- `image`：`"url" | "base64" | "none"`，默认 `url`。如果 `output_formats` 包含 `zip`，则该字段只能为 `none`，或者不传。
+- `formula`：`"latex" | "mathml" | "ascii"`，默认 `latex`
+- `table`：`"html" | "markdown" | "image"`，默认 `html`
+- `cs`：`"image"`，默认 `image`
+
+**`feature_config` 字段：**
+- `enable_text_cross_page`：boolean，默认 `false`
+- `enable_table_cross_page`：boolean，默认 `false`
+- `enable_title_level_recognition`：boolean，默认 `false`
+- `enable_inline_image`：boolean，默认 `true`
+- `enable_table_image`：boolean，默认 `true`
+- `enable_image_understanding`：boolean，默认 `true`
+- `keep_header_footer`：boolean，默认 `false`
 
 **支持的文件格式：** 
 - PDF (`.pdf`)
@@ -76,15 +91,13 @@
 // 将 PDF 解析为 Markdown
 {
   "file_path": "/path/to/document.pdf",
-  "output_format": "markdown"
+  "output_formats": ["markdown"]
 }
 
-// 将图片解析为 JSON 并提取图片
+// 将图片解析为 JSON
 {
   "file_path": "/path/to/image.png",
-  "output_format": "json",
-  "extract_images": true,
-  "language": "zh"
+  "output_formats": ["json"]
 }
 ```
 

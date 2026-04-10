@@ -2,7 +2,7 @@
 
 [English](README.md) | [中文](README_CN.md)
 
-A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server for **Somark's document parsing API**. It converts PDF and image files into Markdown or JSON format with high accuracy.
+A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server for **Somark's document parsing API**. It parses PDF and image files into Markdown, JSON, SoMarkDown format with high accuracy, and can also package the parsing results as a ZIP file.
 
 ## Quick Start
 
@@ -42,14 +42,30 @@ Set or update the Somark API key at runtime (useful when the environment variabl
 
 ### `extract_document`
 
-Parse PDF or image files (PNG, JPG, JPEG, BMP, TIFF, JP2, DIB, PPM, PGM, PBM, GIF, HEIC, HEIF, WebP, XPM, TGA, DDS, XBM) to Markdown or JSON format.
+Parse PDF or image files (PNG, JPG, JPEG, BMP, TIFF, JP2, DIB, PPM, PGM, PBM, GIF, HEIC, HEIF, WebP, XPM, TGA, DDS, XBM) into `markdown`, `json`, `somarkdown` format, and package the parsing results as a `zip` file.
 
 | Parameter | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
 | `file_path` | string | Yes | — | Absolute path to the PDF or image file |
-| `output_format` | `"markdown"` \| `"json"` | No | `"markdown"` | Output format |
-| `extract_images` | boolean | No | `false` | Whether to extract images from the document |
-| `language` | string | No | auto-detect | Language code (e.g., `en`, `zh`, `ja`) |
+| `output_formats` | `Array<"json" \| "markdown" \| "somarkdown" \| "zip">` | Yes | — | Output formats. Allowed values: `json`, `markdown`, `somarkdown`, `zip`. Duplicate values are not allowed. If `zip` is included, the only valid combinations are `["zip"]` and a two-item combination containing both `json` and `zip` (order does not matter). |
+| `element_formats` | object | No | See below | Element rendering formats. |
+| `feature_config` | object | No | See below | Extraction options. |
+
+**`element_formats` fields:**
+- `image`: `"url" | "base64" | "none"`, default `url`. If `output_formats` includes `zip`, only `none` is allowed, or the field may be omitted.
+- `formula`: `"latex" | "mathml" | "ascii"`, default `latex`
+- `table`: `"html" | "markdown" | "image"`, default `html`
+- `cs`: `"image"`, default `image`
+
+**`feature_config` fields:**
+- `enable_text_cross_page`: boolean, default `false`
+- `enable_table_cross_page`: boolean, default `false`
+- `enable_title_level_recognition`: boolean, default `false`
+- `enable_inline_image`: boolean, default `true`
+- `enable_table_image`: boolean, default `true`
+- `enable_image_understanding`: boolean, default `true`
+- `keep_header_footer`: boolean, default `false`
+
 
 **Supported file formats:**
 - PDF (`.pdf`)
@@ -76,15 +92,13 @@ Parse PDF or image files (PNG, JPG, JPEG, BMP, TIFF, JP2, DIB, PPM, PGM, PBM, GI
 // Parse a PDF to Markdown
 {
   "file_path": "/path/to/document.pdf",
-  "output_format": "markdown"
+  "output_formats": ["markdown"]
 }
 
-// Parse an image to JSON with image extraction
+// Parse an image to JSON
 {
   "file_path": "/path/to/image.png",
-  "output_format": "json",
-  "extract_images": true,
-  "language": "en"
+  "output_formats": ["json"],
 }
 ```
 
