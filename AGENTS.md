@@ -54,7 +54,7 @@ Somark MCP Server 是一个基于 Model Context Protocol (MCP) 的服务器，�
 - `file_path` (必填): 文件的绝对路径
 - `output_formats` (必填): 输出格式列表，可选值为 `"markdown"`、`"json"`、`"somarkdown"`、`"zip"`。不允许重复值；当包含 `zip` 时，仅允许 `["zip"]` 或同时包含 `json` 和 `zip` 的两个元素组合（顺序不限）
 - `element_formats` (可选): 元素渲染格式配置
-  - `image`: `"url"` | `"base64"` | `"none"`，默认 `"url"`；当 `output_formats` 包含 `zip` 时，只能为 `"none"` 或不传
+  - `image`: `"url"` | `"base64"` | `"file"` | `"none"`，默认 `"url"`；当 `output_formats` 包含 `zip` 时，只能为 `"file"` 或不传
   - `formula`: `"latex"` | `"mathml"` | `"ascii"`，默认 `"latex"`
   - `table`: `"html"` | `"markdown"` | `"image"`，默认 `"html"`
   - `cs`: `"image"`，默认 `"image"`

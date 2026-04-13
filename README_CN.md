@@ -52,7 +52,7 @@
 | `feature_config` | object | 否 | 见下文 | 提取选项配置。 |
 
 **`element_formats` 字段：**
-- `image`：`"url" | "base64" | "none"`，默认 `url`。如果 `output_formats` 包含 `zip`，则该字段只能为 `none`，或者不传。
+- `image`：`"url" | "base64" | "file" | "none"`，默认 `url`。如果 `output_formats` 包含 `zip`，则该字段只能为 `file`，或者不传。
 - `formula`：`"latex" | "mathml" | "ascii"`，默认 `latex`
 - `table`：`"html" | "markdown" | "image"`，默认 `html`
 - `cs`：`"image"`，默认 `image`

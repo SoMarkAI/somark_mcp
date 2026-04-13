@@ -187,7 +187,7 @@ server.registerTool(
                     .describe('Output formats. Allowed values: json, markdown, somarkdown, zip'),
                 element_formats: z
                     .object({
-                        image: z.enum(['url', 'base64', 'none']).optional(),
+                        image: z.enum(['url', 'base64', 'file', 'none']).optional(),
                         formula: z.enum(['latex', 'mathml', 'ascii']).optional(),
                         table: z.enum(['html', 'markdown', 'image']).optional(),
                         cs: z.literal('image').optional(),
@@ -208,11 +208,11 @@ server.registerTool(
                     .describe('Extraction options'),
             })
             .superRefine((data, ctx) => {
-                if (data.output_formats.includes('zip') && data.element_formats?.image !== undefined && data.element_formats.image !== 'none') {
+                if (data.output_formats.includes('zip') && data.element_formats?.image !== undefined && data.element_formats.image !== 'file') {
                     ctx.addIssue({
                         code: z.ZodIssueCode.custom,
                         path: ['element_formats', 'image'],
-                        message: "When output_formats contains 'zip', element_formats.image can only be 'none' or be omitted.",
+                        message: "When output_formats contains 'zip', element_formats.image can only be 'file' or be omitted.",
                     })
                 }
             }),

@@ -52,7 +52,7 @@ Parse PDF or image files (PNG, JPG, JPEG, BMP, TIFF, JP2, DIB, PPM, PGM, PBM, GI
 | `feature_config` | object | No | See below | Extraction options. |
 
 **`element_formats` fields:**
-- `image`: `"url" | "base64" | "none"`, default `url`. If `output_formats` includes `zip`, only `none` is allowed, or the field may be omitted.
+- `image`: `"url" | "base64" | "file" | "none"`, default `url`. If `output_formats` includes `zip`, only `file` is allowed, or the field may be omitted.
 - `formula`: `"latex" | "mathml" | "ascii"`, default `latex`
 - `table`: `"html" | "markdown" | "image"`, default `html`
 - `cs`: `"image"`, default `image`
