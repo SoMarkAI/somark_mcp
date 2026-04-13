@@ -364,7 +364,7 @@ server.registerTool(
                         file_type?: string
                     }
                 }
-            }>('/parse/acc_sync', {
+            }>('/parse/sync', {
                 method: 'POST',
                 body: formData,
             })

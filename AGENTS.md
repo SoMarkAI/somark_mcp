@@ -13,7 +13,7 @@ Somark MCP Server 是一个基于 Model Context Protocol (MCP) 的服务器，�
 ### 接口信息
 
 - **API Base URL**: `https://api.somark.tech/v1`
-- **使用的接口**: `/parse/acc_sync` - 同步文档解析接口
+- **使用的接口**: `/parse/sync` - 同步文档解析接口
 - **认证方式**: Bearer Token (API Key)
 
 ### 接口功能
@@ -48,7 +48,7 @@ Somark MCP Server 是一个基于 Model Context Protocol (MCP) 的服务器，�
 
 ### extract_document
 
-解析文档工具，对接 `/parse/acc_sync` 接口。
+解析文档工具，对接 `/parse/sync` 接口。
 
 **参数**:
 - `file_path` (必填): 文件的绝对路径
@@ -98,4 +98,4 @@ Somark MCP Server 是一个基于 Model Context Protocol (MCP) 的服务器，�
 
 ## 未来扩展
 
-目前只实现了文档解析功能（`/parse/acc_sync`），其他功能暂未对接。
+目前只实现了文档解析功能（`/parse/sync`），其他功能暂未对接。
