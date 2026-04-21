@@ -44,12 +44,12 @@
 
 将 PDF 或图片文件（PNG、JPG、JPEG、BMP、TIFF、JP2、DIB、PPM、PGM、PBM、GIF、HEIC、HEIF、WebP、XPM、TGA、DDS、XBM）解析为 `markdown`、`json` 格式。
 
-| 参数              | 类型                          | 必填 | 默认值 | 说明                                                     |
-| ----------------- | ----------------------------- | ---- | ------ | -------------------------------------------------------- |
-| `file_path`       | string                        | 是   | —      | PDF 或图片文件的绝对路径                                 |
-| `output_formats`  | `Array<"json" \| "markdown">` | 否   | —      | 输出格式列表。允许值：`json`、`markdown`。不允许重复值。 |
-| `element_formats` | object                        | 否   | 见下文 | 元素渲染格式配置。                                       |
-| `feature_config`  | object                        | 否   | 见下文 | 提取选项配置。                                           |
+| 参数              | 类型                          | 必填 | 默认值               | 说明                                                     |
+| ----------------- | ----------------------------- | ---- | -------------------- | -------------------------------------------------------- |
+| `file_path`       | string                        | 是   | —                    | PDF 或图片文件的绝对路径                                 |
+| `output_formats`  | `Array<"json" \| "markdown">` | 否   | ["json", "markdown"] | 输出格式列表。允许值：`json`、`markdown`。不允许重复值。 |
+| `element_formats` | object                        | 否   | 见下文               | 元素渲染格式配置。                                       |
+| `feature_config`  | object                        | 否   | 见下文               | 提取选项配置。                                           |
 
 **`element_formats` 字段：**
 
@@ -118,8 +118,6 @@ pnpm exec tsc --noEmit  # 类型检查
 pnpm test             # 完整 MCP 服务器测试
 pnpm test:api         # API 连接测试
 ```
-
-详细文档请参阅 [test/README.md](test/README.md)。
 
 ## 常见问题
 
