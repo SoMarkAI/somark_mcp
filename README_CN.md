@@ -12,15 +12,15 @@
 
 ```json
 {
-  "mcpServers": {
-    "somark": {
-      "command": "npx",
-      "args": ["-y", "somark-mcp"],
-      "env": {
-        "SOMARK_API_KEY": "your-api-key-here"
-      }
+    "mcpServers": {
+        "somark": {
+            "command": "npx",
+            "args": ["-y", "somark-mcp"],
+            "env": {
+                "SOMARK_API_KEY": "your-api-key-here"
+            }
+        }
     }
-  }
 }
 ```
 
@@ -36,28 +36,30 @@
 
 在运行时设置或更新 Somark API Key（未设置环境变量时使用）。
 
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `api_key` | string | 是 | 你的 Somark API Key，从 [somark.tech](https://somark.tech/workbench/apikey) 获取 |
+| 参数      | 类型   | 必填 | 说明                                                                             |
+| --------- | ------ | ---- | -------------------------------------------------------------------------------- |
+| `api_key` | string | 是   | 你的 Somark API Key，从 [somark.tech](https://somark.tech/workbench/apikey) 获取 |
 
 ### `extract_document`
 
-将 PDF 或图片文件（PNG、JPG、JPEG、BMP、TIFF、JP2、DIB、PPM、PGM、PBM、GIF、HEIC、HEIF、WebP、XPM、TGA、DDS、XBM）解析为 `markdown`、`json`、 `somarkdown` 格式，以及将解析结果打包为 `zip`。
+将 PDF 或图片文件（PNG、JPG、JPEG、BMP、TIFF、JP2、DIB、PPM、PGM、PBM、GIF、HEIC、HEIF、WebP、XPM、TGA、DDS、XBM）解析为 `markdown`、`json` 格式。
 
-| 参数 | 类型 | 必填 | 默认值 | 说明 |
-|------|------|------|--------|------|
-| `file_path` | string | 是 | — | PDF 或图片文件的绝对路径 |
-| `output_formats` | `Array<"json" \| "markdown">` | 否 | — | 输出格式列表。允许值：`json`、`markdown`。不允许重复值。|
-| `element_formats` | object | 否 | 见下文 | 元素渲染格式配置。 |
-| `feature_config` | object | 否 | 见下文 | 提取选项配置。 |
+| 参数              | 类型                          | 必填 | 默认值 | 说明                                                     |
+| ----------------- | ----------------------------- | ---- | ------ | -------------------------------------------------------- |
+| `file_path`       | string                        | 是   | —      | PDF 或图片文件的绝对路径                                 |
+| `output_formats`  | `Array<"json" \| "markdown">` | 否   | —      | 输出格式列表。允许值：`json`、`markdown`。不允许重复值。 |
+| `element_formats` | object                        | 否   | 见下文 | 元素渲染格式配置。                                       |
+| `feature_config`  | object                        | 否   | 见下文 | 提取选项配置。                                           |
 
 **`element_formats` 字段：**
+
 - `image`：`"url" | "base64" | "none"`，默认 `url`
 - `formula`：`"latex" | "mathml" | "ascii"`，默认 `latex`
 - `table`：`"html" | "markdown" | "image"`，默认 `html`
 - `cs`：`"image"`，默认 `image`
 
 **`feature_config` 字段：**
+
 - `enable_text_cross_page`：boolean，默认 `false`
 - `enable_table_cross_page`：boolean，默认 `false`
 - `enable_title_level_recognition`：boolean，默认 `false`
@@ -66,7 +68,8 @@
 - `enable_image_understanding`：boolean，默认 `true`
 - `keep_header_footer`：boolean，默认 `false`
 
-**支持的文件格式：** 
+**支持的文件格式：**
+
 - PDF (`.pdf`)
 - PNG (`.png`)
 - JPEG (`.jpg`、`.jpeg`)
@@ -120,11 +123,11 @@ pnpm test:api         # API 连接测试
 
 ## 常见问题
 
-| 问题 | 解决方案 |
-|------|----------|
-| "API key not configured" | 在 MCP 客户端配置中添加 `SOMARK_API_KEY`，或使用 `set_api_key` 工具 |
-| 连接问题 | 检查 API Key 是否有效，确认 [somark.tech](https://somark.tech) 可以访问 |
-| 不支持的文件格式 | 支持 PDF、PNG、JPG、JPEG、BMP、TIFF、JP2、DIB、PPM、PGM、PBM、GIF、HEIC、HEIF、WebP、XPM、TGA、DDS、XBM 格式 |
+| 问题                     | 解决方案                                                                                                     |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| "API key not configured" | 在 MCP 客户端配置中添加 `SOMARK_API_KEY`，或使用 `set_api_key` 工具                                          |
+| 连接问题                 | 检查 API Key 是否有效，确认 [somark.tech](https://somark.tech) 可以访问                                      |
+| 不支持的文件格式         | 支持 PDF、PNG、JPG、JPEG、BMP、TIFF、JP2、DIB、PPM、PGM、PBM、GIF、HEIC、HEIF、WebP、XPM、TGA、DDS、XBM 格式 |
 
 ## 许可证
 
