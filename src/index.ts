@@ -19,6 +19,7 @@ const SERVER_VERSION = '1.0.1'
 
 // SoMark API configuration
 const SOMARK_API_BASE = 'https://somark.tech/api/v1'
+const MAX_SYNC_FILE_SIZE_BYTES = 200 * 1024 * 1024
 
 // API Key storage (will be provided via environment variable)
 let apiKey: string | null = process.env.SOMARK_API_KEY || null
@@ -182,6 +183,7 @@ server.registerTool(
             file_path: z.string().describe('Absolute path to the PDF or image file to parse'),
             output_formats: z
                 .array(z.enum(['json', 'markdown']))
+                .refine((values) => new Set(values).size === values.length, 'duplicate values')
                 .optional()
                 .describe('Output formats. Allowed values: json, markdown'),
             element_formats: z
@@ -245,21 +247,7 @@ server.registerTool(
                 )
             }
 
-            if (!output_formats || output_formats.length === 0) {
-                output_formats = ['json', 'markdown']
-            }
-
-            const allowedOutputFormats = new Set(['json', 'markdown'])
-            const invalidFormats = output_formats.filter((item) => {
-                return !allowedOutputFormats.has(item.trim())
-            })
-            if (invalidFormats.length > 0) {
-                throw new Error(`Invalid output_formats: ${invalidFormats.join(', ')}. Allowed values are json, markdown.`)
-            }
-            if (new Set(output_formats).size !== output_formats.length) {
-                throw new Error('output_formats contains duplicate values.')
-            }
-            const normalizedOutputFormats = output_formats.map((item) => item.trim())
+            const normalizedOutputFormats = output_formats && output_formats.length > 0 ? output_formats : ['json', 'markdown']
 
             const normalizedElementFormats = {
                 image: element_formats?.image ?? 'url',
@@ -278,10 +266,18 @@ server.registerTool(
                 keep_header_footer: feature_config?.keep_header_footer ?? false,
             }
 
+            const fileName = path.basename(file_path)
+            const fileSize = fs.statSync(file_path).size
+
+            if (fileSize > MAX_SYNC_FILE_SIZE_BYTES) {
+                throw new Error(
+                    `File too large: ${fileName} is ${(fileSize / 1024 / 1024).toFixed(2)} MB. ` +
+                        `The current synchronous uploader supports files up to ${(MAX_SYNC_FILE_SIZE_BYTES / 1024 / 1024).toFixed(0)} MB.`,
+                )
+            }
+
             // Read file as buffer
             const fileBuffer = fs.readFileSync(file_path)
-            const fileName = path.basename(file_path)
-            const fileSize = fileBuffer.length
 
             console.error(`Processing file: ${fileName} (${(fileSize / 1024).toFixed(2)} KB)`)
 
@@ -335,7 +331,7 @@ server.registerTool(
                         imgs: string[]
                         outputs: {
                             markdown?: string
-                            json?: any
+                            json?: unknown
                         }
                     }
                     error: string | null
@@ -360,9 +356,17 @@ server.registerTool(
 
             const jsonContent = outputs.json
             const markdownContent = typeof outputs.markdown === 'string' && outputs.markdown.trim() ? outputs.markdown : ''
+            const hasJsonContent =
+                jsonContent !== undefined &&
+                jsonContent !== null &&
+                (Array.isArray(jsonContent) ? jsonContent.length > 0 : typeof jsonContent !== 'object' || Object.keys(jsonContent).length > 0)
+            const imageUrls =
+                normalizedElementFormats.image === 'url'
+                    ? data.result.imgs.filter((img) => typeof img === 'string' && img.trim().length > 0)
+                    : []
 
             const extractedOutputs: Record<string, unknown> = {}
-            if (jsonContent !== undefined) {
+            if (hasJsonContent) {
                 extractedOutputs.json = jsonContent
             }
             if (markdownContent) {
@@ -380,6 +384,9 @@ server.registerTool(
             if (Array.isArray(data.result.imgs) && data.result.imgs.length > 0) {
                 responseText += `- Images: ${data.result.imgs.length}\n`
             }
+            if (imageUrls.length > 0) {
+                responseText += `- Image URLs: ${imageUrls.length}\n`
+            }
 
             if (Object.keys(extractedOutputs).length > 0) {
                 responseText += `- Outputs: ${Object.keys(extractedOutputs).join(', ')}\n`
@@ -389,7 +396,7 @@ server.registerTool(
                 responseText += `\n--- Markdown ---\n\n${markdownContent}`
             }
 
-            if (jsonContent !== undefined) {
+            if (hasJsonContent) {
                 responseText += `\n\n--- JSON ---\n\n\`\`\`json\n${JSON.stringify(jsonContent, null, 2)}\n\`\`\``
             }
 
