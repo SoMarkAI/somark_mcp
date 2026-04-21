@@ -30,6 +30,32 @@ const server = spawn('node', [join(__dirname, '..', 'build', 'index.js')], {
 
 let responseBuffer = ''
 let requestId = 0
+let completed = false
+
+function stopServer() {
+    if (!server.killed) {
+        server.kill()
+    }
+}
+
+function exitWithError(message, details) {
+    if (completed) return
+    completed = true
+    console.error(`\n❌ ${message}`)
+    if (details !== undefined) {
+        console.error(JSON.stringify(details, null, 2))
+    }
+    stopServer()
+    process.exit(1)
+}
+
+function exitSuccessfully() {
+    if (completed) return
+    completed = true
+    console.log('\n✅ Test completed successfully!\n')
+    stopServer()
+    process.exit(0)
+}
 
 server.stdout.on('data', (data) => {
     responseBuffer += data.toString()
@@ -44,7 +70,21 @@ server.stdout.on('data', (data) => {
             const response = JSON.parse(line)
             console.log('📨 Response:', JSON.stringify(response, null, 2))
 
+            if (response.error) {
+                exitWithError(`JSON-RPC request ${response.id ?? 'unknown'} failed`, response.error)
+            }
+
             if (response.id === 2) {
+                const tools = response.result?.tools
+                if (!Array.isArray(tools)) {
+                    exitWithError('tools/list did not return a tools array', response)
+                }
+
+                const hasExtractDocument = tools.some((tool) => tool?.name === 'extract_document')
+                if (!hasExtractDocument) {
+                    exitWithError('tools/list response does not include extract_document', response)
+                }
+
                 // Got tools list, now call extract_document
                 console.log('\n✅ Server initialized, calling extract_document...\n')
 
@@ -63,10 +103,24 @@ server.stdout.on('data', (data) => {
 
                 server.stdin.write(JSON.stringify(callRequest) + '\n')
             } else if (response.id === 3) {
-                // Got result
-                console.log('\n✅ Test completed successfully!\n')
-                server.kill()
-                process.exit(0)
+                const result = response.result
+                if (!result || typeof result !== 'object') {
+                    exitWithError('tools/call did not return a result object', response)
+                }
+
+                if (result.isError) {
+                    exitWithError('extract_document returned isError=true', result)
+                }
+
+                const textContent = Array.isArray(result.content)
+                    ? result.content.find((item) => item?.type === 'text' && typeof item.text === 'string')
+                    : null
+
+                if (!textContent || !textContent.text.trim()) {
+                    exitWithError('extract_document returned no non-empty text content', result)
+                }
+
+                exitSuccessfully()
             }
         } catch (e) {
             // Not complete JSON yet
@@ -77,8 +131,7 @@ server.stdout.on('data', (data) => {
 })
 
 server.on('error', (error) => {
-    console.error('❌ Server error:', error)
-    process.exit(1)
+    exitWithError('Server error', error)
 })
 
 // 1. Initialize
@@ -109,7 +162,5 @@ setTimeout(() => {
 
 // Timeout
 setTimeout(() => {
-    console.error('\n⏱️  Test timeout')
-    server.kill()
-    process.exit(1)
+    exitWithError('Test timeout')
 }, 30000)
