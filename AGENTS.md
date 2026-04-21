@@ -1,8 +1,8 @@
-# Somark MCP Server - 开发文档
+# SoMark MCP Server - 开发文档
 
 ## 简介
 
-Somark MCP Server 是一个基于 Model Context Protocol (MCP) 的服务器，用于对接 Somark API 的文档解析功能。
+SoMark MCP Server 是一个基于 Model Context Protocol (MCP) 的服务器，用于对接 SoMark API 的文档解析功能。
 
 ## 主要功能
 
@@ -12,7 +12,7 @@ Somark MCP Server 是一个基于 Model Context Protocol (MCP) 的服务器，�
 
 ### 接口信息
 
-- **API Base URL**: `https://somark.tech/v1`
+- **API Base URL**: `https://somark.tech/api/v1`
 - **使用的接口**: `/parse/sync` - 同步文档解析接口
 - **认证方式**: `multipart/form-data` 请求体中的 `api_key` 字段
 
@@ -41,7 +41,7 @@ Somark MCP Server 是一个基于 Model Context Protocol (MCP) 的服务器，�
 ## 参考文档
 
 - MCP 开发文档: https://modelcontextprotocol.io/docs/develop/build-server#typescript
-- Somark API 文档: https://docs.somark.tech/api-reference/
+- SoMark API 文档: https://docs.somark.tech/api-reference/
 - API Key 获取: https://somark.tech
 
 ## 工具说明
