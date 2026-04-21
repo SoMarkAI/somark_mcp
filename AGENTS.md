@@ -12,7 +12,7 @@ Somark MCP Server 是一个基于 Model Context Protocol (MCP) 的服务器，�
 
 ### 接口信息
 
-- **API Base URL**: `https://api.somark.tech/v1`
+- **API Base URL**: `https://somark.tech/v1`
 - **使用的接口**: `/parse/sync` - 同步文档解析接口
 - **认证方式**: Bearer Token (API Key)
 
