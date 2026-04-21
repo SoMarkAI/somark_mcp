@@ -2,7 +2,7 @@
 
 [English](README.md) | [中文](README_CN.md)
 
-基于 [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) 的 **Somark 文档解析服务器**，支持将 PDF 和图片文件高精度解析为 Markdown、JSON、 SoMarkDown 格式，以及将解析结果打包为 ZIP。
+基于 [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) 的 **Somark 文档解析服务器**，支持将 PDF 和图片文件高精度解析为 Markdown、JSON 格式。
 
 ## 快速开始
 
@@ -47,12 +47,12 @@
 | 参数 | 类型 | 必填 | 默认值 | 说明 |
 |------|------|------|--------|------|
 | `file_path` | string | 是 | — | PDF 或图片文件的绝对路径 |
-| `output_formats` | `Array<"json" \| "markdown" \| "somarkdown" \| "zip">` | 是 | — | 输出格式列表。允许值：`json`、`markdown`、`somarkdown`、`zip`。不允许重复值。如果包含 `zip`，则只允许 `["zip"]`，或者同时包含 `json` 和 `zip` 的两个元素组合（顺序不限）。 |
+| `output_formats` | `Array<"json" \| "markdown">` | 否 | — | 输出格式列表。允许值：`json`、`markdown`。不允许重复值。|
 | `element_formats` | object | 否 | 见下文 | 元素渲染格式配置。 |
 | `feature_config` | object | 否 | 见下文 | 提取选项配置。 |
 
 **`element_formats` 字段：**
-- `image`：`"url" | "base64" | "file" | "none"`，默认 `url`。如果 `output_formats` 包含 `zip`，则该字段只能为 `file`，或者不传。
+- `image`：`"url" | "base64" | "none"`，默认 `url`
 - `formula`：`"latex" | "mathml" | "ascii"`，默认 `latex`
 - `table`：`"html" | "markdown" | "image"`，默认 `html`
 - `cs`：`"image"`，默认 `image`

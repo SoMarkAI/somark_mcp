@@ -2,7 +2,7 @@
 
 [English](README.md) | [中文](README_CN.md)
 
-A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server for **Somark's document parsing API**. It parses PDF and image files into Markdown, JSON, SoMarkDown format with high accuracy, and can also package the parsing results as a ZIP file.
+A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server for **Somark's document parsing API**. It parses PDF and image files into Markdown, JSON format with high accuracy.
 
 ## Quick Start
 
@@ -42,17 +42,17 @@ Set or update the Somark API key at runtime (useful when the environment variabl
 
 ### `extract_document`
 
-Parse PDF or image files (PNG, JPG, JPEG, BMP, TIFF, JP2, DIB, PPM, PGM, PBM, GIF, HEIC, HEIF, WebP, XPM, TGA, DDS, XBM) into `markdown`, `json`, `somarkdown` format, and package the parsing results as a `zip` file.
+Parse PDF or image files (PNG, JPG, JPEG, BMP, TIFF, JP2, DIB, PPM, PGM, PBM, GIF, HEIC, HEIF, WebP, XPM, TGA, DDS, XBM) into `markdown`, `json` format.
 
 | Parameter | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
 | `file_path` | string | Yes | — | Absolute path to the PDF or image file |
-| `output_formats` | `Array<"json" \| "markdown" \| "somarkdown" \| "zip">` | Yes | — | Output formats. Allowed values: `json`, `markdown`, `somarkdown`, `zip`. Duplicate values are not allowed. If `zip` is included, the only valid combinations are `["zip"]` and a two-item combination containing both `json` and `zip` (order does not matter). |
+| `output_formats` | `Array<"json" \| "markdown">` | No | — | Output formats. Allowed values: `json`, `markdown`. Duplicate values are not allowed. |
 | `element_formats` | object | No | See below | Element rendering formats. |
 | `feature_config` | object | No | See below | Extraction options. |
 
 **`element_formats` fields:**
-- `image`: `"url" | "base64" | "file" | "none"`, default `url`. If `output_formats` includes `zip`, only `file` is allowed, or the field may be omitted.
+- `image`: `"url" | "base64" | "none"`, default `url`
 - `formula`: `"latex" | "mathml" | "ascii"`, default `latex`
 - `table`: `"html" | "markdown" | "image"`, default `html`
 - `cs`: `"image"`, default `image`
