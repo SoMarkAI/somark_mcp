@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * Somark MCP Server
+ * SoMark MCP Server
  *
- * This MCP server provides document parsing tools using Somark API.
+ * This MCP server provides document parsing tools using SoMark API.
  * It supports PDF and image files, converting them to markdown or JSON format.
  * Before using, please obtain an API key from https://somark.tech
  */
@@ -17,7 +17,7 @@ import * as path from 'path'
 const SERVER_NAME = 'somark_mcp'
 const SERVER_VERSION = '1.0.1'
 
-// Somark API configuration
+// SoMark API configuration
 const SOMARK_API_BASE = 'https://somark.tech/api/v1'
 
 // API Key storage (will be provided via environment variable)
@@ -46,11 +46,11 @@ function setApiKey(key: string): void {
 }
 
 /**
- * Make HTTP request to Somark API with file upload support
+ * Make HTTP request to SoMark API with file upload support
  */
 async function somarkRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     // Build headers - don't set Content-Type for FormData (fetch handles it automatically)
-    // Note: Somark API uses api_key in request body, not Authorization header
+    // Note: SoMark API uses api_key in request body, not Authorization header
     const headers: HeadersInit =
         options.body instanceof FormData
             ? {} // No special headers for FormData
@@ -74,7 +74,7 @@ async function somarkRequest<T>(endpoint: string, options: RequestInit = {}): Pr
     } catch (error) {
         if (error instanceof TypeError && error.message === 'fetch failed') {
             // Network error
-            throw new Error(`fetch failed - Cannot reach Somark API at ${SOMARK_API_BASE}${endpoint}. Check your network connection.`)
+            throw new Error(`fetch failed - Cannot reach SoMark API at ${SOMARK_API_BASE}${endpoint}. Check your network connection.`)
         }
         throw error
     }
@@ -85,7 +85,7 @@ const server = new McpServer(
     { name: SERVER_NAME, version: SERVER_VERSION },
     {
         instructions:
-            'Somark MCP Server - Provides document parsing tools for converting PDF and images to markdown or JSON. ' +
+            'SoMark MCP Server - Provides document parsing tools for converting PDF and images to markdown or JSON. ' +
             'IMPORTANT: Before using extract_document tool, ALWAYS check if API key is configured by using check_api_key tool first. ' +
             "If API key is not configured, use the 'set_api_key' tool to ask the user for their API key. " +
             'Users can get their API key from https://somark.tech',
@@ -98,13 +98,13 @@ const server = new McpServer(
 
 /**
  * Tool: check_api_key
- * Check if Somark API key is configured
+ * Check if SoMark API key is configured
  */
 server.registerTool(
     'check_api_key',
     {
         title: 'Check API Key Status',
-        description: 'Check if Somark API key is configured. Use this before calling extract_document.',
+        description: 'Check if SoMark API key is configured. Use this before calling extract_document.',
         inputSchema: z.object({}),
     },
     async () => {
@@ -125,15 +125,15 @@ server.registerTool(
 
 /**
  * Tool: set_api_key
- * Configure the Somark API key for authentication
+ * Configure the SoMark API key for authentication
  */
 server.registerTool(
     'set_api_key',
     {
-        title: 'Set Somark API Key',
-        description: 'Configure your Somark API key for document parsing. Get your API key from https://somark.tech',
+        title: 'Set SoMark API Key',
+        description: 'Configure your SoMark API key for document parsing. Get your API key from https://somark.tech',
         inputSchema: z.object({
-            api_key: z.string().describe('Your Somark API key from https://somark.tech'),
+            api_key: z.string().describe('Your SoMark API key from https://somark.tech'),
         }),
     },
     async ({ api_key }) => {
@@ -177,7 +177,7 @@ server.registerTool(
     {
         title: 'Extract Document',
         description:
-            "Use Somark's document parsing API to parse PDF or image files (PNG, JPG, JPEG, BMP, TIFF, JP2, DIB, PPM, PGM, PBM, GIF, HEIC, HEIF, WebP, XPM, TGA, DDS, XBM) into Markdown, JSON",
+            "Use SoMark's document parsing API to parse PDF or image files (PNG, JPG, JPEG, BMP, TIFF, JP2, DIB, PPM, PGM, PBM, GIF, HEIC, HEIF, WebP, XPM, TGA, DDS, XBM) into Markdown, JSON",
         inputSchema: z.object({
             file_path: z.string().describe('Absolute path to the PDF or image file to parse'),
             output_formats: z
@@ -322,7 +322,7 @@ server.registerTool(
             formData.append('element_formats', JSON.stringify(normalizedElementFormats))
             formData.append('feature_config', JSON.stringify(normalizedFeatureConfig))
 
-            console.error(`Sending request to Somark API...`)
+            console.error(`Sending request to SoMark API...`)
 
             // Make API request
             const response = await somarkRequest<{
@@ -411,7 +411,7 @@ server.registerTool(
             if (message.includes('fetch failed')) {
                 helpfulMessage += '\n\nPossible causes:'
                 helpfulMessage += '\n- Network connection issue'
-                helpfulMessage += '\n- Somark API server is unreachable'
+                helpfulMessage += '\n- SoMark API server is unreachable'
                 helpfulMessage += '\n- Invalid API key'
                 helpfulMessage += '\n- Firewall blocking the request'
                 helpfulMessage += '\n\nPlease check:'
@@ -443,7 +443,7 @@ async function main() {
         console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
         console.error('⚠️  SOMARK_API_KEY environment variable not set.')
         console.error('')
-        console.error('To use Somark MCP Server, you need an API key:')
+        console.error('To use SoMark MCP Server, you need an API key:')
         console.error('1. Get your API key from: https://somark.tech')
         console.error('2. Configure it using one of these methods:')
         console.error("   • Use the 'set_api_key' tool (recommended for this session)")
@@ -458,10 +458,10 @@ async function main() {
     const transport = new StdioServerTransport()
     await server.connect(transport)
 
-    console.error(`Somark MCP Server v${SERVER_VERSION} started.`)
+    console.error(`SoMark MCP Server v${SERVER_VERSION} started.`)
     console.error(`Available tools:`)
     console.error(`  - check_api_key: Check if API key is configured`)
-    console.error(`  - set_api_key: Configure your Somark API key`)
+    console.error(`  - set_api_key: Configure your SoMark API key`)
     console.error(`  - extract_document: Parse PDF/images to markdown/JSON`)
 }
 
