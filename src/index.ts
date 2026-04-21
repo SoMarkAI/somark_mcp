@@ -43,7 +43,7 @@ function requireApiKey(): string {
  */
 function setApiKey(key: string): void {
     apiKey = key
-    console.error(`API key configured successfully.`)
+    console.log(`API key configured successfully.`)
 }
 
 /**
@@ -279,7 +279,7 @@ server.registerTool(
             // Read file as buffer
             const fileBuffer = fs.readFileSync(file_path)
 
-            console.error(`Processing file: ${fileName} (${(fileSize / 1024).toFixed(2)} KB)`)
+            console.log(`Processing file: ${fileName} (${(fileSize / 1024).toFixed(2)} KB)`)
 
             // Determine MIME type based on extension
             const mimeTypes: Record<string, string> = {
@@ -301,7 +301,7 @@ server.registerTool(
                 '.webp': 'image/webp',
                 '.xpm': 'image/x-xpixmap',
                 '.tga': 'image/x-tga',
-                '.dds': 'image/vnd-ms.dds',
+                '.dds': 'image/vnd.ms-dds',
                 '.xbm': 'image/x-xbitmap',
             }
             const mimeType = mimeTypes[ext] || 'application/octet-stream'
@@ -318,7 +318,7 @@ server.registerTool(
             formData.append('element_formats', JSON.stringify(normalizedElementFormats))
             formData.append('feature_config', JSON.stringify(normalizedFeatureConfig))
 
-            console.error(`Sending request to SoMark API...`)
+            console.log(`Sending request to SoMark API...`)
 
             // Make API request
             const response = await somarkRequest<{
@@ -360,10 +360,7 @@ server.registerTool(
                 jsonContent !== undefined &&
                 jsonContent !== null &&
                 (Array.isArray(jsonContent) ? jsonContent.length > 0 : typeof jsonContent !== 'object' || Object.keys(jsonContent).length > 0)
-            const imageUrls =
-                normalizedElementFormats.image === 'url'
-                    ? data.result.imgs.filter((img) => typeof img === 'string' && img.trim().length > 0)
-                    : []
+            const imageUrls = normalizedElementFormats.image === 'url' ? data.result.imgs.filter((img) => typeof img === 'string' && img.trim().length > 0) : []
 
             const extractedOutputs: Record<string, unknown> = {}
             if (hasJsonContent) {
@@ -385,7 +382,7 @@ server.registerTool(
                 responseText += `- Images: ${data.result.imgs.length}\n`
             }
             if (imageUrls.length > 0) {
-                responseText += `- Image URLs: ${imageUrls.length}\n`
+                responseText += `- Image URLs:\n${imageUrls.map((u) => `  - ${u}`).join('\n')}\n`
             }
 
             if (Object.keys(extractedOutputs).length > 0) {
@@ -465,11 +462,11 @@ async function main() {
     const transport = new StdioServerTransport()
     await server.connect(transport)
 
-    console.error(`SoMark MCP Server v${SERVER_VERSION} started.`)
-    console.error(`Available tools:`)
-    console.error(`  - check_api_key: Check if API key is configured`)
-    console.error(`  - set_api_key: Configure your SoMark API key`)
-    console.error(`  - extract_document: Parse PDF/images to markdown/JSON`)
+    console.log(`SoMark MCP Server v${SERVER_VERSION} started.`)
+    console.log(`Available tools:`)
+    console.log(`  - check_api_key: Check if API key is configured`)
+    console.log(`  - set_api_key: Configure your SoMark API key`)
+    console.log(`  - extract_document: Parse PDF/images to markdown/JSON`)
 }
 
 main().catch((error) => {
