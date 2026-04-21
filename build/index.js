@@ -1,21 +1,22 @@
 #!/usr/bin/env node
 /**
- * Somark MCP Server
+ * SoMark MCP Server
  *
- * This MCP server provides document parsing tools using Somark API.
+ * This MCP server provides document parsing tools using SoMark API.
  * It supports PDF and image files, converting them to markdown or JSON format.
  * Before using, please obtain an API key from https://somark.tech
  */
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { z } from "zod";
-import * as fs from "fs";
-import * as path from "path";
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { z } from 'zod';
+import * as fs from 'fs';
+import * as path from 'path';
 // Server configuration
-const SERVER_NAME = "somark_mcp";
-const SERVER_VERSION = "1.0.0";
-// Somark API configuration
-const SOMARK_API_BASE = "https://somark.tech/api/v1";
+const SERVER_NAME = 'somark_mcp';
+const SERVER_VERSION = '1.0.1';
+// SoMark API configuration
+const SOMARK_API_BASE = 'https://somark.tech/api/v1';
+const MAX_SYNC_FILE_SIZE_BYTES = 200 * 1024 * 1024;
 // API Key storage (will be provided via environment variable)
 let apiKey = process.env.SOMARK_API_KEY || null;
 /**
@@ -24,8 +25,8 @@ let apiKey = process.env.SOMARK_API_KEY || null;
 function requireApiKey() {
     if (!apiKey) {
         throw new Error("API key not configured. Please use the 'set_api_key' tool to configure your API key, " +
-            "or set the SOMARK_API_KEY environment variable. " +
-            "Get your API key from https://somark.tech");
+            'or set the SOMARK_API_KEY environment variable. ' +
+            'Get your API key from https://somark.tech');
     }
     return apiKey;
 }
@@ -37,15 +38,15 @@ function setApiKey(key) {
     console.error(`API key configured successfully.`);
 }
 /**
- * Make HTTP request to Somark API with file upload support
+ * Make HTTP request to SoMark API with file upload support
  */
 async function somarkRequest(endpoint, options = {}) {
     // Build headers - don't set Content-Type for FormData (fetch handles it automatically)
-    // Note: Somark API uses api_key in request body, not Authorization header
+    // Note: SoMark API uses api_key in request body, not Authorization header
     const headers = options.body instanceof FormData
         ? {} // No special headers for FormData
         : {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
             ...options.headers,
         };
     try {
@@ -62,37 +63,37 @@ async function somarkRequest(endpoint, options = {}) {
     catch (error) {
         if (error instanceof TypeError && error.message === 'fetch failed') {
             // Network error
-            throw new Error(`fetch failed - Cannot reach Somark API at ${SOMARK_API_BASE}${endpoint}. Check your network connection.`);
+            throw new Error(`fetch failed - Cannot reach SoMark API at ${SOMARK_API_BASE}${endpoint}. Check your network connection.`);
         }
         throw error;
     }
 }
 // Create MCP server instance
 const server = new McpServer({ name: SERVER_NAME, version: SERVER_VERSION }, {
-    instructions: "Somark MCP Server - Provides document parsing tools for converting PDF and images to markdown or JSON. " +
-        "IMPORTANT: Before using extract_document tool, ALWAYS check if API key is configured by using check_api_key tool first. " +
+    instructions: 'SoMark MCP Server - Provides document parsing tools for converting PDF and images to markdown or JSON. ' +
+        'IMPORTANT: Before using extract_document tool, ALWAYS check if API key is configured by using check_api_key tool first. ' +
         "If API key is not configured, use the 'set_api_key' tool to ask the user for their API key. " +
-        "Users can get their API key from https://somark.tech",
+        'Users can get their API key from https://somark.tech',
 });
 // ============================================
 // Tool Definitions
 // ============================================
 /**
  * Tool: check_api_key
- * Check if Somark API key is configured
+ * Check if SoMark API key is configured
  */
-server.registerTool("check_api_key", {
-    title: "Check API Key Status",
-    description: "Check if Somark API key is configured. Use this before calling extract_document.",
+server.registerTool('check_api_key', {
+    title: 'Check API Key Status',
+    description: 'Check if SoMark API key is configured. Use this before calling extract_document.',
     inputSchema: z.object({}),
 }, async () => {
     const isConfigured = apiKey !== null && apiKey.length > 0;
     return {
         content: [
             {
-                type: "text",
+                type: 'text',
                 text: isConfigured
-                    ? "✓ API key is configured and ready to use."
+                    ? '✓ API key is configured and ready to use.'
                     : "✗ API key is not configured. Please use the 'set_api_key' tool to configure it. Get your API key from https://somark.tech",
             },
         ],
@@ -100,26 +101,26 @@ server.registerTool("check_api_key", {
 });
 /**
  * Tool: set_api_key
- * Configure the Somark API key for authentication
+ * Configure the SoMark API key for authentication
  */
-server.registerTool("set_api_key", {
-    title: "Set Somark API Key",
-    description: "Configure your Somark API key for document parsing. Get your API key from https://somark.tech",
+server.registerTool('set_api_key', {
+    title: 'Set SoMark API Key',
+    description: 'Configure your SoMark API key for document parsing. Get your API key from https://somark.tech',
     inputSchema: z.object({
-        api_key: z.string().describe("Your Somark API key from https://somark.tech"),
+        api_key: z.string().describe('Your SoMark API key from https://somark.tech'),
     }),
 }, async ({ api_key }) => {
     try {
         if (!api_key || api_key.trim().length === 0) {
-            throw new Error("API key cannot be empty");
+            throw new Error('API key cannot be empty');
         }
         // Set the API key
         setApiKey(api_key.trim());
         return {
             content: [
                 {
-                    type: "text",
-                    text: "✓ API key configured successfully! You can now use the extract_document tool to parse documents.",
+                    type: 'text',
+                    text: '✓ API key configured successfully! You can now use the extract_document tool to parse documents.',
                 },
             ],
         };
@@ -129,7 +130,7 @@ server.registerTool("set_api_key", {
         return {
             content: [
                 {
-                    type: "text",
+                    type: 'text',
                     text: `Error setting API key: ${message}`,
                 },
             ],
@@ -141,16 +142,39 @@ server.registerTool("set_api_key", {
  * Tool: extract_document
  * Parse PDF or image files to markdown or JSON format
  */
-server.registerTool("extract_document", {
-    title: "Extract Document",
-    description: "Parse PDF or image files (PNG, JPG, JPEG, BMP, TIFF, JP2, DIB, PPM, PGM, PBM, GIF, HEIC, HEIF, WebP, XPM, TGA, DDS, XBM) to markdown or JSON format using Somark's document parsing API",
+server.registerTool('extract_document', {
+    title: 'Extract Document',
+    description: "Use SoMark's document parsing API to parse PDF or image files (PNG, JPG, JPEG, BMP, TIFF, JP2, DIB, PPM, PGM, PBM, GIF, HEIC, HEIF, WebP, XPM, TGA, DDS, XBM) into Markdown, JSON",
     inputSchema: z.object({
-        file_path: z.string().describe("Absolute path to the PDF or image file to parse"),
-        output_format: z.enum(["markdown", "json"]).default("markdown").describe("Output format: markdown or json"),
-        extract_images: z.boolean().optional().default(false).describe("Whether to extract images from the document"),
-        language: z.string().optional().describe("Document language code (e.g., 'en', 'zh', 'ja'). Auto-detect if not specified"),
+        file_path: z.string().describe('Absolute path to the PDF or image file to parse'),
+        output_formats: z
+            .array(z.enum(['json', 'markdown']))
+            .refine((values) => new Set(values).size === values.length, 'duplicate values')
+            .optional()
+            .describe('Output formats. Allowed values: json, markdown'),
+        element_formats: z
+            .object({
+            image: z.enum(['url', 'base64', 'none']).optional(),
+            formula: z.enum(['latex', 'mathml', 'ascii']).optional(),
+            table: z.enum(['html', 'markdown', 'image']).optional(),
+            cs: z.literal('image').optional(),
+        })
+            .optional()
+            .describe('Element rendering formats. Defaults: image=url, formula=latex, table=html, cs=image'),
+        feature_config: z
+            .object({
+            enable_text_cross_page: z.boolean().optional(),
+            enable_table_cross_page: z.boolean().optional(),
+            enable_title_level_recognition: z.boolean().optional(),
+            enable_inline_image: z.boolean().optional(),
+            enable_table_image: z.boolean().optional(),
+            enable_image_understanding: z.boolean().optional(),
+            keep_header_footer: z.boolean().optional(),
+        })
+            .optional()
+            .describe('Extraction options'),
     }),
-}, async ({ file_path, output_format, extract_images, language }) => {
+}, async ({ file_path, output_formats, element_formats, feature_config }) => {
     try {
         // Check if file exists
         if (!fs.existsSync(file_path)) {
@@ -159,17 +183,54 @@ server.registerTool("extract_document", {
         // Check file extension
         const ext = path.extname(file_path).toLowerCase();
         const allowedExtensions = [
-            '.pdf', '.png', '.jpg', '.jpeg', '.bmp', '.tiff', '.tif',
-            '.jp2', '.dib', '.ppm', '.pgm', '.pbm', '.gif', '.heic',
-            '.heif', '.webp', '.xpm', '.tga', '.dds', '.xbm'
+            '.pdf',
+            '.png',
+            '.jpg',
+            '.jpeg',
+            '.bmp',
+            '.tiff',
+            '.tif',
+            '.jp2',
+            '.dib',
+            '.ppm',
+            '.pgm',
+            '.pbm',
+            '.gif',
+            '.heic',
+            '.heif',
+            '.webp',
+            '.xpm',
+            '.tga',
+            '.dds',
+            '.xbm',
         ];
         if (!allowedExtensions.includes(ext)) {
             throw new Error(`Unsupported file format: ${ext}. Supported formats: PDF, PNG, JPG, JPEG, BMP, TIFF, JP2, DIB, PPM, PGM, PBM, GIF, HEIC, HEIF, WebP, XPM, TGA, DDS, XBM`);
         }
+        const normalizedOutputFormats = output_formats && output_formats.length > 0 ? output_formats : ['json', 'markdown'];
+        const normalizedElementFormats = {
+            image: element_formats?.image ?? 'url',
+            formula: element_formats?.formula ?? 'latex',
+            table: element_formats?.table ?? 'html',
+            cs: element_formats?.cs ?? 'image',
+        };
+        const normalizedFeatureConfig = {
+            enable_text_cross_page: feature_config?.enable_text_cross_page ?? false,
+            enable_table_cross_page: feature_config?.enable_table_cross_page ?? false,
+            enable_title_level_recognition: feature_config?.enable_title_level_recognition ?? false,
+            enable_inline_image: feature_config?.enable_inline_image ?? true,
+            enable_table_image: feature_config?.enable_table_image ?? true,
+            enable_image_understanding: feature_config?.enable_image_understanding ?? true,
+            keep_header_footer: feature_config?.keep_header_footer ?? false,
+        };
+        const fileName = path.basename(file_path);
+        const fileSize = fs.statSync(file_path).size;
+        if (fileSize > MAX_SYNC_FILE_SIZE_BYTES) {
+            throw new Error(`File too large: ${fileName} is ${(fileSize / 1024 / 1024).toFixed(2)} MB. ` +
+                `The current synchronous uploader supports files up to ${(MAX_SYNC_FILE_SIZE_BYTES / 1024 / 1024).toFixed(0)} MB.`);
+        }
         // Read file as buffer
         const fileBuffer = fs.readFileSync(file_path);
-        const fileName = path.basename(file_path);
-        const fileSize = fileBuffer.length;
         console.error(`Processing file: ${fileName} (${(fileSize / 1024).toFixed(2)} KB)`);
         // Determine MIME type based on extension
         const mimeTypes = {
@@ -200,49 +261,64 @@ server.registerTool("extract_document", {
         const file = new File([fileBuffer], fileName, { type: mimeType });
         formData.append('file', file);
         formData.append('api_key', requireApiKey());
-        formData.append('output_formats', output_format); // Note: plural 'formats'
-        if (extract_images) {
-            formData.append('extract_images', 'true');
+        for (const item of normalizedOutputFormats) {
+            formData.append('output_formats', item);
         }
-        if (language) {
-            formData.append('language', language);
-        }
-        console.error(`Sending request to Somark API...`);
+        formData.append('element_formats', JSON.stringify(normalizedElementFormats));
+        formData.append('feature_config', JSON.stringify(normalizedFeatureConfig));
+        console.error(`Sending request to SoMark API...`);
         // Make API request
-        const response = await somarkRequest("/extract/acc_sync", {
-            method: "POST",
+        const response = await somarkRequest('/parse/sync', {
+            method: 'POST',
             body: formData,
         });
+        const { code, message, data } = response;
         // Check if API returned an error
-        if (response.code !== 0 || response.data.error) {
-            throw new Error(`API error: ${response.message || response.data.error}`);
+        if (code !== 0) {
+            throw new Error(`API error: ${data.error || message || 'Unknown error'}`);
         }
-        const { task_id, result, metadata } = response.data;
+        const { outputs } = data.result; // 获取解析结果
+        const jsonContent = outputs.json;
+        const markdownContent = typeof outputs.markdown === 'string' && outputs.markdown.trim() ? outputs.markdown : '';
+        const hasJsonContent = jsonContent !== undefined &&
+            jsonContent !== null &&
+            (Array.isArray(jsonContent) ? jsonContent.length > 0 : typeof jsonContent !== 'object' || Object.keys(jsonContent).length > 0);
+        const imageUrls = normalizedElementFormats.image === 'url'
+            ? data.result.imgs.filter((img) => typeof img === 'string' && img.trim().length > 0)
+            : [];
+        const extractedOutputs = {};
+        if (hasJsonContent) {
+            extractedOutputs.json = jsonContent;
+        }
+        if (markdownContent) {
+            extractedOutputs.markdown = markdownContent;
+        }
         // Format response based on output format
         let responseText = `Document parsed successfully!\n\n`;
-        responseText += `- Task ID: ${task_id}\n`;
-        responseText += `- File: ${result.file_name}\n`;
-        if (metadata.page_num) {
-            responseText += `- Pages: ${metadata.page_num}\n`;
+        responseText += `- Task ID: ${data.task_id}\n`;
+        responseText += `- File: ${data.result.file_name}\n`;
+        if (data.metadata.page_num) {
+            responseText += `- Pages: ${data.metadata.page_num}\n`;
         }
-        if (result.imgs && result.imgs.length > 0) {
-            responseText += `- Images: ${result.imgs.length}\n`;
+        if (Array.isArray(data.result.imgs) && data.result.imgs.length > 0) {
+            responseText += `- Images: ${data.result.imgs.length}\n`;
         }
-        responseText += `\n--- Parsed Content ---\n\n`;
-        if (output_format === "markdown" && result.outputs.markdown) {
-            responseText += result.outputs.markdown;
+        if (imageUrls.length > 0) {
+            responseText += `- Image URLs: ${imageUrls.length}\n`;
         }
-        else if (output_format === "json" && result.outputs.json) {
-            responseText += JSON.stringify(result.outputs.json, null, 2);
+        if (Object.keys(extractedOutputs).length > 0) {
+            responseText += `- Outputs: ${Object.keys(extractedOutputs).join(', ')}\n`;
         }
-        else {
-            // Fallback: show available output
-            responseText += JSON.stringify(result.outputs, null, 2);
+        if (markdownContent) {
+            responseText += `\n--- Markdown ---\n\n${markdownContent}`;
+        }
+        if (hasJsonContent) {
+            responseText += `\n\n--- JSON ---\n\n\`\`\`json\n${JSON.stringify(jsonContent, null, 2)}\n\`\`\``;
         }
         return {
             content: [
                 {
-                    type: "text",
+                    type: 'text',
                     text: responseText,
                 },
             ],
@@ -256,7 +332,7 @@ server.registerTool("extract_document", {
         if (message.includes('fetch failed')) {
             helpfulMessage += '\n\nPossible causes:';
             helpfulMessage += '\n- Network connection issue';
-            helpfulMessage += '\n- Somark API server is unreachable';
+            helpfulMessage += '\n- SoMark API server is unreachable';
             helpfulMessage += '\n- Invalid API key';
             helpfulMessage += '\n- Firewall blocking the request';
             helpfulMessage += '\n\nPlease check:';
@@ -267,7 +343,7 @@ server.registerTool("extract_document", {
         return {
             content: [
                 {
-                    type: "text",
+                    type: 'text',
                     text: helpfulMessage,
                 },
             ],
@@ -281,30 +357,30 @@ server.registerTool("extract_document", {
 async function main() {
     // Check for API key on startup
     if (!apiKey) {
-        console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-        console.error("⚠️  SOMARK_API_KEY environment variable not set.");
-        console.error("");
-        console.error("To use Somark MCP Server, you need an API key:");
-        console.error("1. Get your API key from: https://somark.tech");
-        console.error("2. Configure it using one of these methods:");
+        console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.error('⚠️  SOMARK_API_KEY environment variable not set.');
+        console.error('');
+        console.error('To use SoMark MCP Server, you need an API key:');
+        console.error('1. Get your API key from: https://somark.tech');
+        console.error('2. Configure it using one of these methods:');
         console.error("   • Use the 'set_api_key' tool (recommended for this session)");
         console.error("   • Set environment variable: export SOMARK_API_KEY='your-key'");
-        console.error("");
+        console.error('');
         console.error("Don't worry - I'll prompt you for the API key when needed!");
-        console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-        console.error("");
+        console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+        console.error('');
     }
     // Connect using stdio transport
     const transport = new StdioServerTransport();
     await server.connect(transport);
-    console.error(`Somark MCP Server v${SERVER_VERSION} started.`);
+    console.error(`SoMark MCP Server v${SERVER_VERSION} started.`);
     console.error(`Available tools:`);
     console.error(`  - check_api_key: Check if API key is configured`);
-    console.error(`  - set_api_key: Configure your Somark API key`);
+    console.error(`  - set_api_key: Configure your SoMark API key`);
     console.error(`  - extract_document: Parse PDF/images to markdown/JSON`);
 }
 main().catch((error) => {
-    console.error("Failed to start server:", error);
+    console.error('Failed to start server:', error);
     process.exit(1);
 });
 //# sourceMappingURL=index.js.map

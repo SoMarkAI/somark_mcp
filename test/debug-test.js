@@ -106,9 +106,9 @@ async function testConnection() {
         
         // 5. Test API request
         console.log('\n5️⃣  Sending request to Somark API...');
-        console.log(`   Endpoint: ${SOMARK_API_BASE}/extract/acc_sync`);
+        console.log(`   Endpoint: ${SOMARK_API_BASE}/parse/sync`);
         
-        const response = await fetch(`${SOMARK_API_BASE}/extract/acc_sync`, {
+        const response = await fetch(`${SOMARK_API_BASE}/parse/sync`, {
             method: 'POST',
             body: formData,
         });
