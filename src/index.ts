@@ -15,7 +15,7 @@ import * as path from 'path'
 
 // Server configuration
 const SERVER_NAME = 'somark_mcp'
-const SERVER_VERSION = '1.0.0'
+const SERVER_VERSION = '1.0.1'
 
 // Somark API configuration
 const SOMARK_API_BASE = 'https://somark.tech/api/v1'
