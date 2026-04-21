@@ -1,8 +1,8 @@
-# Somark MCP Server
+# SoMark MCP Server
 
 [English](README.md) | [中文](README_CN.md)
 
-基于 [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) 的 **Somark 文档解析服务器**，支持将 PDF 和图片文件高精度解析为 Markdown、JSON 格式。
+基于 [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) 的 **SoMark 文档解析服务器**，支持将 PDF 和图片文件高精度解析为 Markdown、JSON 格式。
 
 ## 快速开始
 
@@ -30,15 +30,15 @@
 
 ### `check_api_key`
 
-检查 Somark API Key 是否已配置并可用。
+检查 SoMark API Key 是否已配置并可用。
 
 ### `set_api_key`
 
-在运行时设置或更新 Somark API Key（未设置环境变量时使用）。
+在运行时设置或更新 SoMark API Key（未设置环境变量时使用）。
 
 | 参数      | 类型   | 必填 | 说明                                                                             |
 | --------- | ------ | ---- | -------------------------------------------------------------------------------- |
-| `api_key` | string | 是   | 你的 Somark API Key，从 [somark.tech](https://somark.tech/workbench/apikey) 获取 |
+| `api_key` | string | 是   | 你的 SoMark API Key，从 [somark.tech](https://somark.tech/workbench/apikey) 获取 |
 
 ### `extract_document`
 

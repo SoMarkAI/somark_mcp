@@ -1,8 +1,8 @@
-# Somark MCP Server
+# SoMark MCP Server
 
 [English](README.md) | [中文](README_CN.md)
 
-A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server for **Somark's document parsing API**. It parses PDF and image files into Markdown, JSON format with high accuracy.
+A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server for **SoMark's document parsing API**. It parses PDF and image files into Markdown, JSON format with high accuracy.
 
 ## Quick Start
 
@@ -30,15 +30,15 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server for **
 
 ### `check_api_key`
 
-Check whether the Somark API key is configured and ready to use.
+Check whether the SoMark API key is configured and ready to use.
 
 ### `set_api_key`
 
-Set or update the Somark API key at runtime (useful when the environment variable is not set).
+Set or update the SoMark API key at runtime (useful when the environment variable is not set).
 
 | Parameter | Type   | Required | Description                                                                  |
 | --------- | ------ | -------- | ---------------------------------------------------------------------------- |
-| `api_key` | string | Yes      | Your Somark API key from [somark.tech](https://somark.tech/workbench/apikey) |
+| `api_key` | string | Yes      | Your SoMark API key from [somark.tech](https://somark.tech/workbench/apikey) |
 
 ### `extract_document`
 
