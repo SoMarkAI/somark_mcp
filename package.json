@@ -1,7 +1,7 @@
 {
   "name": "somark-mcp",
-  "version": "1.0.0",
-  "description": "MCP server for Somark document parsing API - converts PDF and images to markdown/JSON",
+  "version": "1.0.1",
+  "description": "MCP server for SoMark document parsing API - converts PDF and images to Markdown/JSON",
   "main": "build/index.js",
   "type": "module",
   "bin": {
