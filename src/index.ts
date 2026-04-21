@@ -177,45 +177,35 @@ server.registerTool(
     {
         title: 'Extract Document',
         description:
-            "Use Somark's document parsing API to parse PDF or image files (PNG, JPG, JPEG, BMP, TIFF, JP2, DIB, PPM, PGM, PBM, GIF, HEIC, HEIF, WebP, XPM, TGA, DDS, XBM) into Markdown, JSON, and SoMarkDown formats, and provide a ZIP download URL for the parsing results.",
-        inputSchema: z
-            .object({
-                file_path: z.string().describe('Absolute path to the PDF or image file to parse'),
-                output_formats: z
-                    .array(z.enum(['json', 'markdown', 'somarkdown', 'zip']))
-                    .nonempty()
-                    .describe('Output formats. Allowed values: json, markdown, somarkdown, zip'),
-                element_formats: z
-                    .object({
-                        image: z.enum(['url', 'base64', 'file', 'none']).optional(),
-                        formula: z.enum(['latex', 'mathml', 'ascii']).optional(),
-                        table: z.enum(['html', 'markdown', 'image']).optional(),
-                        cs: z.literal('image').optional(),
-                    })
-                    .optional()
-                    .describe('Element rendering formats. Defaults: image=url, formula=latex, table=html, cs=image'),
-                feature_config: z
-                    .object({
-                        enable_text_cross_page: z.boolean().optional(),
-                        enable_table_cross_page: z.boolean().optional(),
-                        enable_title_level_recognition: z.boolean().optional(),
-                        enable_inline_image: z.boolean().optional(),
-                        enable_table_image: z.boolean().optional(),
-                        enable_image_understanding: z.boolean().optional(),
-                        keep_header_footer: z.boolean().optional(),
-                    })
-                    .optional()
-                    .describe('Extraction options'),
-            })
-            .superRefine((data, ctx) => {
-                if (data.output_formats.includes('zip') && data.element_formats?.image !== undefined && data.element_formats.image !== 'file') {
-                    ctx.addIssue({
-                        code: z.ZodIssueCode.custom,
-                        path: ['element_formats', 'image'],
-                        message: "When output_formats contains 'zip', element_formats.image can only be 'file' or be omitted.",
-                    })
-                }
-            }),
+            "Use Somark's document parsing API to parse PDF or image files (PNG, JPG, JPEG, BMP, TIFF, JP2, DIB, PPM, PGM, PBM, GIF, HEIC, HEIF, WebP, XPM, TGA, DDS, XBM) into Markdown, JSON",
+        inputSchema: z.object({
+            file_path: z.string().describe('Absolute path to the PDF or image file to parse'),
+            output_formats: z
+                .array(z.enum(['json', 'markdown']))
+                .optional()
+                .describe('Output formats. Allowed values: json, markdown'),
+            element_formats: z
+                .object({
+                    image: z.enum(['url', 'base64', 'none']).optional(),
+                    formula: z.enum(['latex', 'mathml', 'ascii']).optional(),
+                    table: z.enum(['html', 'markdown', 'image']).optional(),
+                    cs: z.literal('image').optional(),
+                })
+                .optional()
+                .describe('Element rendering formats. Defaults: image=url, formula=latex, table=html, cs=image'),
+            feature_config: z
+                .object({
+                    enable_text_cross_page: z.boolean().optional(),
+                    enable_table_cross_page: z.boolean().optional(),
+                    enable_title_level_recognition: z.boolean().optional(),
+                    enable_inline_image: z.boolean().optional(),
+                    enable_table_image: z.boolean().optional(),
+                    enable_image_understanding: z.boolean().optional(),
+                    keep_header_footer: z.boolean().optional(),
+                })
+                .optional()
+                .describe('Extraction options'),
+        }),
     },
     async ({ file_path, output_formats, element_formats, feature_config }) => {
         try {
@@ -255,29 +245,21 @@ server.registerTool(
                 )
             }
 
-            if (!Array.isArray(output_formats) || output_formats.length === 0 || !output_formats.every((item) => typeof item === 'string' && item.trim().length > 0)) {
-                throw new Error('output_formats must be a non-empty array of strings.')
+            if (!output_formats || output_formats.length === 0) {
+                output_formats = ['json', 'markdown']
             }
-            const allowedOutputFormats = new Set(['json', 'markdown', 'somarkdown', 'zip'])
+
+            const allowedOutputFormats = new Set(['json', 'markdown'])
             const invalidFormats = output_formats.filter((item) => {
                 return !allowedOutputFormats.has(item.trim())
             })
             if (invalidFormats.length > 0) {
-                throw new Error(`Invalid output_formats: ${invalidFormats.join(', ')}. Allowed values are json, markdown, somarkdown, zip.`)
+                throw new Error(`Invalid output_formats: ${invalidFormats.join(', ')}. Allowed values are json, markdown.`)
             }
             if (new Set(output_formats).size !== output_formats.length) {
                 throw new Error('output_formats contains duplicate values.')
             }
             const normalizedOutputFormats = output_formats.map((item) => item.trim())
-
-            if (normalizedOutputFormats.includes('zip')) {
-                const isZipOnly = normalizedOutputFormats.length === 1 && normalizedOutputFormats[0] === 'zip'
-                const isZipWithJson = normalizedOutputFormats.length === 2 && normalizedOutputFormats.includes('json')
-
-                if (!isZipOnly && !isZipWithJson) {
-                    throw new Error("When zip is included, output_formats must be either ['zip'] or ['zip', 'json'].")
-                }
-            }
 
             const normalizedElementFormats = {
                 image: element_formats?.image ?? 'url',
@@ -354,8 +336,6 @@ server.registerTool(
                         outputs: {
                             markdown?: string
                             json?: any
-                            somarkdown?: string
-                            zip?: string
                         }
                     }
                     error: string | null
@@ -380,8 +360,6 @@ server.registerTool(
 
             const jsonContent = outputs.json
             const markdownContent = typeof outputs.markdown === 'string' && outputs.markdown.trim() ? outputs.markdown : ''
-            const somarkdownContent = typeof outputs.somarkdown === 'string' && outputs.somarkdown.trim() ? outputs.somarkdown : ''
-            const zipUrl = typeof outputs.zip === 'string' && outputs.zip.trim() ? outputs.zip : ''
 
             const extractedOutputs: Record<string, unknown> = {}
             if (jsonContent !== undefined) {
@@ -389,12 +367,6 @@ server.registerTool(
             }
             if (markdownContent) {
                 extractedOutputs.markdown = markdownContent
-            }
-            if (somarkdownContent) {
-                extractedOutputs.somarkdown = somarkdownContent
-            }
-            if (zipUrl) {
-                extractedOutputs.zip = zipUrl
             }
 
             // Format response based on output format
@@ -417,16 +389,8 @@ server.registerTool(
                 responseText += `\n--- Markdown ---\n\n${markdownContent}`
             }
 
-            if (somarkdownContent) {
-                responseText += `\n\n--- SoMarkDown ---\n\n${somarkdownContent}`
-            }
-
             if (jsonContent !== undefined) {
                 responseText += `\n\n--- JSON ---\n\n\`\`\`json\n${JSON.stringify(jsonContent, null, 2)}\n\`\`\``
-            }
-
-            if (zipUrl) {
-                responseText += `\n\n--- ZIP ---\n\n${zipUrl}`
             }
 
             return {
