@@ -4,7 +4,8 @@
  *
  * This MCP server provides document parsing tools using SoMark API.
  * It supports PDF and image files, converting them to markdown or JSON format.
- * Before using, please obtain an API key from https://somark.tech
+ * Before using, please obtain an API key from https://somark.cn (mainland China, default)
+ * or https://somark.ai (global regions including Taiwan, China; Hong Kong, China; Macau, China). Set SOMARK_REGION=global for global regions.
  */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
@@ -18,8 +19,44 @@ const SERVER_NAME = 'somark_mcp'
 const SERVER_VERSION = '1.0.1'
 
 // SoMark API configuration
-const SOMARK_API_BASE = 'https://somark.tech/api/v1'
 const MAX_SYNC_FILE_SIZE_BYTES = 200 * 1024 * 1024
+
+/**
+ * Determine the region from SOMARK_REGION env var.
+ * - 'cn' (default): mainland China
+ * - 'global': outside mainland China (including Taiwan, China; Hong Kong, China; Macau, China)
+ */
+function getRegion(): 'cn' | 'global' {
+    const value = (process.env.SOMARK_REGION || '').toLowerCase().trim()
+    if (value === 'global') {
+        return 'global'
+    }
+    return 'cn'
+}
+
+/** API base URL, varying by region. */
+function getApiBaseUrl(): string {
+    return getRegion() === 'cn' ? 'https://somark.cn/api/v1' : 'https://somark.ai/api/v1'
+}
+
+/** Web base URL (dashboard, API key page), varying by region. */
+function getWebBaseUrl(): string {
+    return getRegion() === 'cn' ? 'https://somark.cn' : 'https://somark.ai'
+}
+
+/** Documentation base URL, varying by region. */
+function getDocsBaseUrl(): string {
+    return getRegion() === 'cn' ? 'https://docs.somark.cn' : 'https://docs.somark.ai'
+}
+
+/** Purchase page URL, varying by region. */
+function getPurchaseUrl(): string {
+    return getRegion() === 'cn'
+        ? 'https://somark.cn/workbench/purchase'
+        : 'https://somark.ai/studio/purchase'
+}
+
+const SOMARK_API_BASE = getApiBaseUrl()
 
 // API Key storage (will be provided via environment variable)
 let apiKey: string | null = process.env.SOMARK_API_KEY || null
@@ -32,7 +69,7 @@ function requireApiKey(): string {
         throw new Error(
             "API key not configured. Please use the 'set_api_key' tool to configure your API key, " +
                 'or set the SOMARK_API_KEY environment variable. ' +
-                'Get your API key from https://somark.tech',
+                'Get your API key from ' + getWebBaseUrl(),
         )
     }
     return apiKey
@@ -89,7 +126,7 @@ const server = new McpServer(
             'SoMark MCP Server - Provides document parsing tools for converting PDF and images to markdown or JSON. ' +
             'IMPORTANT: Before using extract_document tool, ALWAYS check if API key is configured by using check_api_key tool first. ' +
             "If API key is not configured, use the 'set_api_key' tool to ask the user for their API key. " +
-            'Users can get their API key from https://somark.tech',
+            'Users can get their API key from ' + getWebBaseUrl(),
     },
 )
 
@@ -117,7 +154,7 @@ server.registerTool(
                     type: 'text',
                     text: isConfigured
                         ? '✓ API key is configured and ready to use.'
-                        : "✗ API key is not configured. Please use the 'set_api_key' tool to configure it. Get your API key from https://somark.tech",
+                        : "✗ API key is not configured. Please use the 'set_api_key' tool to configure it. Get your API key from " + getWebBaseUrl(),
                 },
             ],
         }
@@ -132,9 +169,9 @@ server.registerTool(
     'set_api_key',
     {
         title: 'Set SoMark API Key',
-        description: 'Configure your SoMark API key for document parsing. Get your API key from https://somark.tech',
+        description: 'Configure your SoMark API key for document parsing. Get your API key from ' + getWebBaseUrl(),
         inputSchema: z.object({
-            api_key: z.string().describe('Your SoMark API key from https://somark.tech'),
+            api_key: z.string().describe('Your SoMark API key from ' + getWebBaseUrl()),
         }),
     },
     async ({ api_key }) => {
@@ -421,7 +458,7 @@ server.registerTool(
                 helpfulMessage += '\n\nPlease check:'
                 helpfulMessage += '\n1. Your internet connection'
                 helpfulMessage += '\n2. API key is correctly set: echo $SOMARK_API_KEY'
-                helpfulMessage += '\n3. Try accessing https://somark.tech/api/v1 directly'
+                helpfulMessage += '\n3. Try accessing ' + getApiBaseUrl() + ' directly'
             }
 
             return {
@@ -448,7 +485,7 @@ async function main() {
         console.error('⚠️  SOMARK_API_KEY environment variable not set.')
         console.error('')
         console.error('To use SoMark MCP Server, you need an API key:')
-        console.error('1. Get your API key from: https://somark.tech')
+        console.error('1. Get your API key from: ' + getWebBaseUrl())
         console.error('2. Configure it using one of these methods:')
         console.error("   • Use the 'set_api_key' tool (recommended for this session)")
         console.error("   • Set environment variable: export SOMARK_API_KEY='your-key'")

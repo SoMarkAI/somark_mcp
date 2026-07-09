@@ -12,7 +12,10 @@ SoMark MCP Server 是一个基于 Model Context Protocol (MCP) 的服务器，�
 
 ### 接口信息
 
-- **API Base URL**: `https://somark.tech/api/v1`
+- **API Base URL**: Region-dependent
+  - Mainland China (default): `https://somark.cn/api/v1`
+  - Outside mainland China (including Taiwan, China; Hong Kong, China; Macau, China): `https://somark.ai/api/v1`
+  - Controlled by `SOMARK_REGION` env var (`cn` or `global`; defaults to `cn`)
 - **使用的接口**: `/parse/sync` - 同步文档解析接口
 - **认证方式**: `multipart/form-data` 请求体中的 `api_key` 字段
 
@@ -36,13 +39,20 @@ SoMark MCP Server 是一个基于 Model Context Protocol (MCP) 的服务器，�
 
 3. **API Key 配置**:
     - 环境变量: `SOMARK_API_KEY`
-    - 如果用户未配置，提示访问 https://somark.tech 获取 API Key
+    - 如果用户未配置，提示访问 https://somark.cn（中国大陆）或 https://somark.ai（中国大陆以外，含中国台湾、中国香港、中国澳门）获取 API Key
 
 ## 参考文档
 
 - MCP 开发文档: https://modelcontextprotocol.io/docs/develop/build-server#typescript
-- SoMark API 文档: https://docs.somark.tech/api-reference/
-- API Key 获取: https://somark.tech
+- SoMark API 文档:
+  - 中国大陆: https://docs.somark.cn/api-reference/
+  - 中国大陆以外（含中国台湾、中国香港、中国澳门）: https://docs.somark.ai/api-reference/
+- API Key 获取:
+  - 中国大陆: https://somark.cn/workbench/apikey
+  - 中国大陆以外（含中国台湾、中国香港、中国澳门）: https://somark.ai/workbench/apikey
+- 购买 API 套餐:
+  - 中国大陆: https://somark.cn/workbench/purchase
+  - 全球: https://somark.ai/studio/purchase
 
 ## 工具说明
 

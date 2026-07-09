@@ -6,7 +6,12 @@
 
 ## 快速开始
 
-**1. 获取 API Key** → [somark.tech/workbench/apikey](https://somark.tech/workbench/apikey)
+**1. 获取 API Key**
+   - 中国大陆：[somark.cn/workbench/apikey](https://somark.cn/workbench/apikey)
+   - 中国大陆以外（含中国台湾、中国香港、中国澳门）：[somark.ai/workbench/apikey](https://somark.ai/workbench/apikey)
+   - 购买 API 套餐：
+     - 中国大陆：[somark.cn/workbench/purchase](https://somark.cn/workbench/purchase)
+     - 全球：[somark.ai/studio/purchase](https://somark.ai/studio/purchase)
 
 **2. 将以下配置添加到你的 MCP 客户端**（Claude Desktop、VS Code、Cursor 等）：
 
@@ -17,7 +22,8 @@
             "command": "npx",
             "args": ["-y", "somark-mcp"],
             "env": {
-                "SOMARK_API_KEY": "your-api-key-here"
+                "SOMARK_API_KEY": "your-api-key-here",
+                "SOMARK_REGION": "cn"
             }
         }
     }
@@ -25,6 +31,15 @@
 ```
 
 **3. 完成！** 让你的 AI 助手解析任意 PDF 或图片文件即可。
+
+## 地区配置
+
+设置 `SOMARK_REGION` 环境变量以选择正确的服务器：
+
+| 地区                                                           | `SOMARK_REGION` | 域名          | API 地址                    | 文档地址                     | 购买                                              |
+| -------------------------------------------------------------- | --------------- | ------------- | --------------------------- | ---------------------------- | ------------------------------------------------- |
+| 中国大陆（默认）                                               | `cn`            | `somark.cn`   | `https://somark.cn/api/v1`  | `https://docs.somark.cn`     | [somark.cn/workbench/purchase](https://somark.cn/workbench/purchase) |
+| 中国大陆以外（含中国台湾、中国香港、中国澳门）                 | `global`        | `somark.ai`   | `https://somark.ai/api/v1`  | `https://docs.somark.ai`     | [somark.ai/studio/purchase](https://somark.ai/studio/purchase) |
 
 ## 可用工具
 
@@ -38,7 +53,7 @@
 
 | 参数      | 类型   | 必填 | 说明                                                                             |
 | --------- | ------ | ---- | -------------------------------------------------------------------------------- |
-| `api_key` | string | 是   | 你的 SoMark API Key，从 [somark.tech](https://somark.tech/workbench/apikey) 获取 |
+| `api_key` | string | 是   | 你的 SoMark API Key，从 [somark.cn](https://somark.cn/workbench/apikey)（中国大陆）或 [somark.ai](https://somark.ai/workbench/apikey)（中国大陆以外，含中国台湾、中国香港、中国澳门）获取 |
 
 ### `extract_document`
 
@@ -124,7 +139,7 @@ pnpm test:api         # API 连接测试
 | 问题                     | 解决方案                                                                                                     |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------ |
 | "API key not configured" | 在 MCP 客户端配置中添加 `SOMARK_API_KEY`，或使用 `set_api_key` 工具                                          |
-| 连接问题                 | 检查 API Key 是否有效，确认 [somark.tech](https://somark.tech) 可以访问                                      |
+| 连接问题                 | 检查 API Key 是否有效，确认 [somark.cn](https://somark.cn) / [somark.ai](https://somark.ai)（根据地区选择）可以访问。中国大陆以外（含中国台湾、中国香港、中国澳门）请设置 `SOMARK_REGION=global`。 |
 | 不支持的文件格式         | 支持 PDF、PNG、JPG、JPEG、BMP、TIFF、JP2、DIB、PPM、PGM、PBM、GIF、HEIC、HEIF、WebP、XPM、TGA、DDS、XBM 格式 |
 
 ## 许可证

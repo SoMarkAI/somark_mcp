@@ -4,7 +4,8 @@
  *
  * This MCP server provides document parsing tools using SoMark API.
  * It supports PDF and image files, converting them to markdown or JSON format.
- * Before using, please obtain an API key from https://somark.tech
+ * Before using, please obtain an API key from https://somark.cn (mainland China, default)
+ * or https://somark.ai (global regions including Taiwan, China; Hong Kong, China; Macau, China). Set SOMARK_REGION=global for global regions.
  */
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
@@ -15,8 +16,38 @@ import * as path from 'path';
 const SERVER_NAME = 'somark_mcp';
 const SERVER_VERSION = '1.0.1';
 // SoMark API configuration
-const SOMARK_API_BASE = 'https://somark.tech/api/v1';
 const MAX_SYNC_FILE_SIZE_BYTES = 200 * 1024 * 1024;
+/**
+ * Determine the region from SOMARK_REGION env var.
+ * - 'cn' (default): mainland China
+ * - 'global': outside mainland China (including Taiwan, China; Hong Kong, China; Macau, China)
+ */
+function getRegion() {
+    const value = (process.env.SOMARK_REGION || '').toLowerCase().trim();
+    if (value === 'global') {
+        return 'global';
+    }
+    return 'cn';
+}
+/** API base URL, varying by region. */
+function getApiBaseUrl() {
+    return getRegion() === 'cn' ? 'https://somark.cn/api/v1' : 'https://somark.ai/api/v1';
+}
+/** Web base URL (dashboard, API key page), varying by region. */
+function getWebBaseUrl() {
+    return getRegion() === 'cn' ? 'https://somark.cn' : 'https://somark.ai';
+}
+/** Documentation base URL, varying by region. */
+function getDocsBaseUrl() {
+    return getRegion() === 'cn' ? 'https://docs.somark.cn' : 'https://docs.somark.ai';
+}
+/** Purchase page URL, varying by region. */
+function getPurchaseUrl() {
+    return getRegion() === 'cn'
+        ? 'https://somark.cn/workbench/purchase'
+        : 'https://somark.ai/studio/purchase';
+}
+const SOMARK_API_BASE = getApiBaseUrl();
 // API Key storage (will be provided via environment variable)
 let apiKey = process.env.SOMARK_API_KEY || null;
 /**
@@ -26,7 +57,7 @@ function requireApiKey() {
     if (!apiKey) {
         throw new Error("API key not configured. Please use the 'set_api_key' tool to configure your API key, " +
             'or set the SOMARK_API_KEY environment variable. ' +
-            'Get your API key from https://somark.tech');
+            'Get your API key from ' + getWebBaseUrl());
     }
     return apiKey;
 }
@@ -35,7 +66,7 @@ function requireApiKey() {
  */
 function setApiKey(key) {
     apiKey = key;
-    console.error(`API key configured successfully.`);
+    console.log(`API key configured successfully.`);
 }
 /**
  * Make HTTP request to SoMark API with file upload support
@@ -73,7 +104,7 @@ const server = new McpServer({ name: SERVER_NAME, version: SERVER_VERSION }, {
     instructions: 'SoMark MCP Server - Provides document parsing tools for converting PDF and images to markdown or JSON. ' +
         'IMPORTANT: Before using extract_document tool, ALWAYS check if API key is configured by using check_api_key tool first. ' +
         "If API key is not configured, use the 'set_api_key' tool to ask the user for their API key. " +
-        'Users can get their API key from https://somark.tech',
+        'Users can get their API key from ' + getWebBaseUrl(),
 });
 // ============================================
 // Tool Definitions
@@ -94,7 +125,7 @@ server.registerTool('check_api_key', {
                 type: 'text',
                 text: isConfigured
                     ? '✓ API key is configured and ready to use.'
-                    : "✗ API key is not configured. Please use the 'set_api_key' tool to configure it. Get your API key from https://somark.tech",
+                    : "✗ API key is not configured. Please use the 'set_api_key' tool to configure it. Get your API key from " + getWebBaseUrl(),
             },
         ],
     };
@@ -105,9 +136,9 @@ server.registerTool('check_api_key', {
  */
 server.registerTool('set_api_key', {
     title: 'Set SoMark API Key',
-    description: 'Configure your SoMark API key for document parsing. Get your API key from https://somark.tech',
+    description: 'Configure your SoMark API key for document parsing. Get your API key from ' + getWebBaseUrl(),
     inputSchema: z.object({
-        api_key: z.string().describe('Your SoMark API key from https://somark.tech'),
+        api_key: z.string().describe('Your SoMark API key from ' + getWebBaseUrl()),
     }),
 }, async ({ api_key }) => {
     try {
@@ -231,7 +262,7 @@ server.registerTool('extract_document', {
         }
         // Read file as buffer
         const fileBuffer = fs.readFileSync(file_path);
-        console.error(`Processing file: ${fileName} (${(fileSize / 1024).toFixed(2)} KB)`);
+        console.log(`Processing file: ${fileName} (${(fileSize / 1024).toFixed(2)} KB)`);
         // Determine MIME type based on extension
         const mimeTypes = {
             '.pdf': 'application/pdf',
@@ -252,7 +283,7 @@ server.registerTool('extract_document', {
             '.webp': 'image/webp',
             '.xpm': 'image/x-xpixmap',
             '.tga': 'image/x-tga',
-            '.dds': 'image/vnd-ms.dds',
+            '.dds': 'image/vnd.ms-dds',
             '.xbm': 'image/x-xbitmap',
         };
         const mimeType = mimeTypes[ext] || 'application/octet-stream';
@@ -266,7 +297,7 @@ server.registerTool('extract_document', {
         }
         formData.append('element_formats', JSON.stringify(normalizedElementFormats));
         formData.append('feature_config', JSON.stringify(normalizedFeatureConfig));
-        console.error(`Sending request to SoMark API...`);
+        console.log(`Sending request to SoMark API...`);
         // Make API request
         const response = await somarkRequest('/parse/sync', {
             method: 'POST',
@@ -283,9 +314,7 @@ server.registerTool('extract_document', {
         const hasJsonContent = jsonContent !== undefined &&
             jsonContent !== null &&
             (Array.isArray(jsonContent) ? jsonContent.length > 0 : typeof jsonContent !== 'object' || Object.keys(jsonContent).length > 0);
-        const imageUrls = normalizedElementFormats.image === 'url'
-            ? data.result.imgs.filter((img) => typeof img === 'string' && img.trim().length > 0)
-            : [];
+        const imageUrls = normalizedElementFormats.image === 'url' ? data.result.imgs.filter((img) => typeof img === 'string' && img.trim().length > 0) : [];
         const extractedOutputs = {};
         if (hasJsonContent) {
             extractedOutputs.json = jsonContent;
@@ -304,7 +333,7 @@ server.registerTool('extract_document', {
             responseText += `- Images: ${data.result.imgs.length}\n`;
         }
         if (imageUrls.length > 0) {
-            responseText += `- Image URLs: ${imageUrls.length}\n`;
+            responseText += `- Image URLs:\n${imageUrls.map((u) => `  - ${u}`).join('\n')}\n`;
         }
         if (Object.keys(extractedOutputs).length > 0) {
             responseText += `- Outputs: ${Object.keys(extractedOutputs).join(', ')}\n`;
@@ -338,7 +367,7 @@ server.registerTool('extract_document', {
             helpfulMessage += '\n\nPlease check:';
             helpfulMessage += '\n1. Your internet connection';
             helpfulMessage += '\n2. API key is correctly set: echo $SOMARK_API_KEY';
-            helpfulMessage += '\n3. Try accessing https://somark.tech/api/v1 directly';
+            helpfulMessage += '\n3. Try accessing ' + getApiBaseUrl() + ' directly';
         }
         return {
             content: [
@@ -361,7 +390,7 @@ async function main() {
         console.error('⚠️  SOMARK_API_KEY environment variable not set.');
         console.error('');
         console.error('To use SoMark MCP Server, you need an API key:');
-        console.error('1. Get your API key from: https://somark.tech');
+        console.error('1. Get your API key from: ' + getWebBaseUrl());
         console.error('2. Configure it using one of these methods:');
         console.error("   • Use the 'set_api_key' tool (recommended for this session)");
         console.error("   • Set environment variable: export SOMARK_API_KEY='your-key'");
@@ -373,11 +402,11 @@ async function main() {
     // Connect using stdio transport
     const transport = new StdioServerTransport();
     await server.connect(transport);
-    console.error(`SoMark MCP Server v${SERVER_VERSION} started.`);
-    console.error(`Available tools:`);
-    console.error(`  - check_api_key: Check if API key is configured`);
-    console.error(`  - set_api_key: Configure your SoMark API key`);
-    console.error(`  - extract_document: Parse PDF/images to markdown/JSON`);
+    console.log(`SoMark MCP Server v${SERVER_VERSION} started.`);
+    console.log(`Available tools:`);
+    console.log(`  - check_api_key: Check if API key is configured`);
+    console.log(`  - set_api_key: Configure your SoMark API key`);
+    console.log(`  - extract_document: Parse PDF/images to markdown/JSON`);
 }
 main().catch((error) => {
     console.error('Failed to start server:', error);

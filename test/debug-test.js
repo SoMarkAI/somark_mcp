@@ -14,7 +14,13 @@ import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const SOMARK_API_BASE = "https://somark.tech/api/v1";
+const SOMARK_REGION = (process.env.SOMARK_REGION || 'cn').toLowerCase().trim();
+const SOMARK_API_BASE = SOMARK_REGION === 'global'
+    ? 'https://somark.ai/api/v1'
+    : 'https://somark.cn/api/v1';
+const WEB_BASE_URL = SOMARK_REGION === 'global'
+    ? 'https://somark.ai'
+    : 'https://somark.cn';
 const API_KEY = process.env.SOMARK_API_KEY;
 
 async function testConnection() {
@@ -33,10 +39,10 @@ async function testConnection() {
     // 2. Test network connectivity
     console.log('\n2️⃣  Testing network connectivity...');
     try {
-        const response = await fetch('https://somark.tech/');
-        console.log(`✅ Can reach somark.tech (Status: ${response.status})`);
+        const response = await fetch(WEB_BASE_URL + '/');
+        console.log(`✅ Can reach ${WEB_BASE_URL} (Status: ${response.status})`);
     } catch (error) {
-        console.error('❌ Cannot reach somark.tech');
+        console.error('❌ Cannot reach ' + WEB_BASE_URL);
         console.error('   Error:', error.message);
         console.log('   Please check your internet connection');
         process.exit(1);
