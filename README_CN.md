@@ -23,7 +23,7 @@
             "args": ["-y", "somark-mcp"],
             "env": {
                 "SOMARK_API_KEY": "your-api-key-here",
-                "SOMARK_REGION": "cn"
+                "SOMARK_API_HOST": "https://somark.cn/api/v1"
             }
         }
     }
@@ -32,14 +32,21 @@
 
 **3. 完成！** 让你的 AI 助手解析任意 PDF 或图片文件即可。
 
-## 地区配置
+## API 地址配置
 
-设置 `SOMARK_REGION` 环境变量以选择正确的服务器：
+设置 `SOMARK_API_HOST` 环境变量选择服务器区域（参考 MiniMax 的 `MINIMAX_API_HOST` 设计）：
 
-| 地区                                                           | `SOMARK_REGION` | 域名          | API 地址                    | 文档地址                     | 购买                                              |
-| -------------------------------------------------------------- | --------------- | ------------- | --------------------------- | ---------------------------- | ------------------------------------------------- |
-| 中国大陆（默认）                                               | `cn`            | `somark.cn`   | `https://somark.cn/api/v1`  | `https://docs.somark.cn`     | [somark.cn/workbench/purchase](https://somark.cn/workbench/purchase) |
-| 中国大陆以外（含中国台湾、中国香港、中国澳门）                 | `global`        | `somark.ai`   | `https://somark.ai/api/v1`  | `https://docs.somark.ai`     | [somark.ai/studio/purchase](https://somark.ai/studio/purchase) |
+| 地区                                                           | `SOMARK_API_HOST`                    |
+| -------------------------------------------------------------- | ------------------------------------ |
+| 中国大陆（默认）                                               | `https://somark.cn/api/v1`           |
+| 中国大陆以外（含中国台湾、中国香港、中国澳门）                 | `https://somark.ai/api/v1`           |
+
+服务器会根据 `SOMARK_API_HOST` 自动推导网站、文档和购买地址：
+
+| 域名          | API 地址                    | 网站                      | 文档                         | 购买                                              |
+| ------------- | --------------------------- | ------------------------- | ---------------------------- | ------------------------------------------------- |
+| `somark.cn`   | `https://somark.cn/api/v1`  | `https://somark.cn`       | `https://docs.somark.cn`     | [somark.cn/workbench/purchase](https://somark.cn/workbench/purchase) |
+| `somark.ai`   | `https://somark.ai/api/v1`  | `https://somark.ai`       | `https://docs.somark.ai`     | [somark.ai/studio/purchase](https://somark.ai/studio/purchase) |
 
 ## 可用工具
 
@@ -139,7 +146,7 @@ pnpm test:api         # API 连接测试
 | 问题                     | 解决方案                                                                                                     |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------ |
 | "API key not configured" | 在 MCP 客户端配置中添加 `SOMARK_API_KEY`，或使用 `set_api_key` 工具                                          |
-| 连接问题                 | 检查 API Key 是否有效，确认 [somark.cn](https://somark.cn) / [somark.ai](https://somark.ai)（根据地区选择）可以访问。中国大陆以外（含中国台湾、中国香港、中国澳门）请设置 `SOMARK_REGION=global`。 |
+| 连接问题                 | 检查 API Key 是否有效，确认 [somark.cn](https://somark.cn) / [somark.ai](https://somark.ai)（根据地区选择）可以访问。中国大陆以外（含中国台湾、中国香港、中国澳门）请设置 `SOMARK_API_HOST=https://somark.ai/api/v1`。 |
 | 不支持的文件格式         | 支持 PDF、PNG、JPG、JPEG、BMP、TIFF、JP2、DIB、PPM、PGM、PBM、GIF、HEIC、HEIF、WebP、XPM、TGA、DDS、XBM 格式 |
 
 ## 许可证

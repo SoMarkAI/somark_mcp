@@ -12,10 +12,9 @@ SoMark MCP Server 是一个基于 Model Context Protocol (MCP) 的服务器，�
 
 ### 接口信息
 
-- **API Base URL**: Region-dependent
+- **API Base URL**: Configured via `SOMARK_API_HOST` env var (similar to MiniMax's `MINIMAX_API_HOST`)
   - Mainland China (default): `https://somark.cn/api/v1`
   - Outside mainland China (including Taiwan, China; Hong Kong, China; Macau, China): `https://somark.ai/api/v1`
-  - Controlled by `SOMARK_REGION` env var (`cn` or `global`; defaults to `cn`)
 - **使用的接口**: `/parse/sync` - 同步文档解析接口
 - **认证方式**: `multipart/form-data` 请求体中的 `api_key` 字段
 

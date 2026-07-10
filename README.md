@@ -23,7 +23,7 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server for **
             "args": ["-y", "somark-mcp"],
             "env": {
                 "SOMARK_API_KEY": "your-api-key-here",
-                "SOMARK_REGION": "cn"
+                "SOMARK_API_HOST": "https://somark.cn/api/v1"
             }
         }
     }
@@ -32,14 +32,21 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server for **
 
 **3. Done!** Ask your AI assistant to parse any PDF or image file.
 
-## Region Configuration
+## API Host Configuration
 
-Set the `SOMARK_REGION` environment variable to choose the correct server:
+Set the `SOMARK_API_HOST` environment variable to choose the server region (similar to MiniMax's `MINIMAX_API_HOST`):
 
-| Region                                                            | `SOMARK_REGION` | Domain       | API Base                    | Documentation               | Purchase                                          |
-| ----------------------------------------------------------------- | --------------- | ------------ | --------------------------- | --------------------------- | ------------------------------------------------- |
-| Mainland China (default)                                          | `cn`            | `somark.cn`   | `https://somark.cn/api/v1`  | `https://docs.somark.cn`    | [somark.cn/workbench/purchase](https://somark.cn/workbench/purchase) |
-| Outside mainland China (including Taiwan, China; Hong Kong, China; Macau, China) | `global`        | `somark.ai`   | `https://somark.ai/api/v1`  | `https://docs.somark.ai`    | [somark.ai/studio/purchase](https://somark.ai/studio/purchase) |
+| Region                                                            | `SOMARK_API_HOST`                    |
+| ----------------------------------------------------------------- | ------------------------------------ |
+| Mainland China (default)                                          | `https://somark.cn/api/v1`           |
+| Outside mainland China (including Taiwan, China; Hong Kong, China; Macau, China) | `https://somark.ai/api/v1`           |
+
+The server automatically derives the web, docs, and purchase URLs from `SOMARK_API_HOST`:
+
+| Domain        | API Base               | Web                      | Docs                         | Purchase                                    |
+| ------------- | ---------------------- | ------------------------ | ---------------------------- | ------------------------------------------- |
+| `somark.cn`   | `https://somark.cn/api/v1` | `https://somark.cn`  | `https://docs.somark.cn`  | [somark.cn/workbench/purchase](https://somark.cn/workbench/purchase) |
+| `somark.ai`   | `https://somark.ai/api/v1` | `https://somark.ai`  | `https://docs.somark.ai`  | [somark.ai/studio/purchase](https://somark.ai/studio/purchase) |
 
 ## Available Tools
 
@@ -139,7 +146,7 @@ pnpm test:api         # API connection test
 | Problem                  | Solution                                                                                                            |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------- |
 | "API key not configured" | Add `SOMARK_API_KEY` to your MCP client config, or use the `set_api_key` tool                                       |
-| Connection issues        | Check that your API key is valid and [somark.cn](https://somark.cn) / [somark.ai](https://somark.ai) (depending on region) is accessible. Set `SOMARK_REGION=global` for outside mainland China (including Taiwan, China; Hong Kong, China; Macau, China). |
+| Connection issues        | Check that your API key is valid and [somark.cn](https://somark.cn) / [somark.ai](https://somark.ai) (depending on region) is accessible. Set `SOMARK_API_HOST=https://somark.ai/api/v1` for outside mainland China (including Taiwan, China; Hong Kong, China; Macau, China). |
 | Unsupported file format  | Supports PDF, PNG, JPG, JPEG, BMP, TIFF, JP2, DIB, PPM, PGM, PBM, GIF, HEIC, HEIF, WebP, XPM, TGA, DDS, XBM formats |
 
 ## License

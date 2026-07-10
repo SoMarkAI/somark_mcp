@@ -14,13 +14,12 @@ import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const SOMARK_REGION = (process.env.SOMARK_REGION || 'cn').toLowerCase().trim();
-const SOMARK_API_BASE = SOMARK_REGION === 'global'
-    ? 'https://somark.ai/api/v1'
-    : 'https://somark.cn/api/v1';
-const WEB_BASE_URL = SOMARK_REGION === 'global'
-    ? 'https://somark.ai'
-    : 'https://somark.cn';
+const SOMARK_API_HOST = (process.env.SOMARK_API_HOST || 'https://somark.cn/api/v1').trim().replace(/\/+$/, '');
+const SOMARK_API_BASE = SOMARK_API_HOST;
+// Derive domain from API host
+let SOMARK_DOMAIN = 'somark.cn';
+try { SOMARK_DOMAIN = new URL(SOMARK_API_HOST).hostname; } catch {}
+const WEB_BASE_URL = 'https://' + SOMARK_DOMAIN;
 const API_KEY = process.env.SOMARK_API_KEY;
 
 async function testConnection() {

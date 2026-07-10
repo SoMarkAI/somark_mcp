@@ -5,7 +5,8 @@
  * This MCP server provides document parsing tools using SoMark API.
  * It supports PDF and image files, converting them to markdown or JSON format.
  * Before using, please obtain an API key from https://somark.cn (mainland China, default)
- * or https://somark.ai (global regions including Taiwan, China; Hong Kong, China; Macau, China). Set SOMARK_REGION=global for global regions.
+ * or https://somark.ai (outside mainland China, including Taiwan, China; Hong Kong, China; Macau, China).
+ * Set SOMARK_API_HOST to switch between regions (e.g., https://somark.ai/api/v1).
  */
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
@@ -18,36 +19,48 @@ const SERVER_VERSION = '1.0.1';
 // SoMark API configuration
 const MAX_SYNC_FILE_SIZE_BYTES = 200 * 1024 * 1024;
 /**
- * Determine the region from SOMARK_REGION env var.
- * - 'cn' (default): mainland China
- * - 'global': outside mainland China (including Taiwan, China; Hong Kong, China; Macau, China)
+ * API host URL from SOMARK_API_HOST env var.
+ * - Default (mainland China): https://somark.cn/api/v1
+ * - Outside mainland China: https://somark.ai/api/v1
+ *
+ * Similar to MiniMax's MINIMAX_API_HOST design.
  */
-function getRegion() {
-    const value = (process.env.SOMARK_REGION || '').toLowerCase().trim();
-    if (value === 'global') {
-        return 'global';
+function getApiHost() {
+    const value = (process.env.SOMARK_API_HOST || '').trim();
+    if (value) {
+        // Normalize: remove trailing slash
+        return value.replace(/\/+$/, '');
     }
-    return 'cn';
+    return 'https://somark.cn/api/v1';
 }
-/** API base URL, varying by region. */
-function getApiBaseUrl() {
-    return getRegion() === 'cn' ? 'https://somark.cn/api/v1' : 'https://somark.ai/api/v1';
+/** Extract the domain from the API host (e.g., "somark.cn" from "https://somark.cn/api/v1"). */
+function getDomain() {
+    const host = getApiHost();
+    try {
+        const url = new URL(host);
+        return url.hostname;
+    }
+    catch {
+        return 'somark.cn';
+    }
 }
-/** Web base URL (dashboard, API key page), varying by region. */
+/** Web base URL (dashboard, API key page), derived from API host. */
 function getWebBaseUrl() {
-    return getRegion() === 'cn' ? 'https://somark.cn' : 'https://somark.ai';
+    return 'https://' + getDomain();
 }
-/** Documentation base URL, varying by region. */
+/** Documentation base URL, derived from API host. */
 function getDocsBaseUrl() {
-    return getRegion() === 'cn' ? 'https://docs.somark.cn' : 'https://docs.somark.ai';
+    return 'https://docs.' + getDomain();
 }
 /** Purchase page URL, varying by region. */
 function getPurchaseUrl() {
-    return getRegion() === 'cn'
-        ? 'https://somark.cn/workbench/purchase'
-        : 'https://somark.ai/studio/purchase';
+    const domain = getDomain();
+    if (domain === 'somark.ai') {
+        return 'https://somark.ai/studio/purchase';
+    }
+    return 'https://somark.cn/workbench/purchase';
 }
-const SOMARK_API_BASE = getApiBaseUrl();
+const SOMARK_API_BASE = getApiHost();
 // API Key storage (will be provided via environment variable)
 let apiKey = process.env.SOMARK_API_KEY || null;
 /**
@@ -367,7 +380,7 @@ server.registerTool('extract_document', {
             helpfulMessage += '\n\nPlease check:';
             helpfulMessage += '\n1. Your internet connection';
             helpfulMessage += '\n2. API key is correctly set: echo $SOMARK_API_KEY';
-            helpfulMessage += '\n3. Try accessing ' + getApiBaseUrl() + ' directly';
+            helpfulMessage += '\n3. Try accessing ' + getApiHost() + ' directly';
         }
         return {
             content: [
