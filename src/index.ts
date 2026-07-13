@@ -6,7 +6,7 @@
  * It supports PDF and image files, converting them to markdown or JSON format.
  * Before using, please obtain an API key from https://somark.cn (mainland China, default)
  * or https://somark.ai (outside mainland China, including Taiwan, China; Hong Kong, China; Macau, China).
- * Set SOMARK_API_HOST to switch between regions (e.g., https://somark.ai/api/v1).
+ * Set SOMARK_API_BASE_URL to switch between regions (e.g., https://somark.ai/api/v1).
  */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
@@ -23,14 +23,14 @@ const SERVER_VERSION = '1.0.1'
 const MAX_SYNC_FILE_SIZE_BYTES = 200 * 1024 * 1024
 
 /**
- * API host URL from SOMARK_API_HOST env var.
+ * API host URL from SOMARK_API_BASE_URL env var.
  * - Default (mainland China): https://somark.cn/api/v1
  * - Outside mainland China: https://somark.ai/api/v1
  *
  * Similar to MiniMax's MINIMAX_API_HOST design.
  */
-function getApiHost(): string {
-    const value = (process.env.SOMARK_API_HOST || '').trim()
+function getApiBaseUrl(): string {
+    const value = (process.env.SOMARK_API_BASE_URL || '').trim()
     if (value) {
         // Normalize: remove trailing slash
         return value.replace(/\/+$/, '')
@@ -40,7 +40,7 @@ function getApiHost(): string {
 
 /** Extract the domain from the API host (e.g., "somark.cn" from "https://somark.cn/api/v1"). */
 function getDomain(): string {
-    const host = getApiHost()
+    const host = getApiBaseUrl()
     try {
         const url = new URL(host)
         return url.hostname
@@ -68,7 +68,7 @@ function getPurchaseUrl(): string {
     return 'https://somark.cn/workbench/purchase'
 }
 
-const SOMARK_API_BASE = getApiHost()
+const SOMARK_API_BASE = getApiBaseUrl()
 
 // API Key storage (will be provided via environment variable)
 let apiKey: string | null = process.env.SOMARK_API_KEY || null
@@ -475,7 +475,7 @@ server.registerTool(
                 helpfulMessage += '\n\nPlease check:'
                 helpfulMessage += '\n1. Your internet connection'
                 helpfulMessage += '\n2. API key is correctly set: echo $SOMARK_API_KEY'
-                helpfulMessage += '\n3. Try accessing ' + getApiHost() + ' directly'
+                helpfulMessage += '\n3. Try accessing ' + getApiBaseUrl() + ' directly'
             }
 
             return {

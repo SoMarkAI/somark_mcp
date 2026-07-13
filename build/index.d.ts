@@ -6,7 +6,7 @@
  * It supports PDF and image files, converting them to markdown or JSON format.
  * Before using, please obtain an API key from https://somark.cn (mainland China, default)
  * or https://somark.ai (outside mainland China, including Taiwan, China; Hong Kong, China; Macau, China).
- * Set SOMARK_API_HOST to switch between regions (e.g., https://somark.ai/api/v1).
+ * Set SOMARK_API_BASE_URL to switch between regions (e.g., https://somark.ai/api/v1).
  */
 export {};
 //# sourceMappingURL=index.d.ts.map

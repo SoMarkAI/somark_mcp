@@ -14,11 +14,11 @@ import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const SOMARK_API_HOST = (process.env.SOMARK_API_HOST || 'https://somark.cn/api/v1').trim().replace(/\/+$/, '');
-const SOMARK_API_BASE = SOMARK_API_HOST;
+const SOMARK_API_BASE_URL = (process.env.SOMARK_API_BASE_URL || 'https://somark.cn/api/v1').trim().replace(/\/+$/, '');
+const SOMARK_API_BASE = SOMARK_API_BASE_URL;
 // Derive domain from API host
 let SOMARK_DOMAIN = 'somark.cn';
-try { SOMARK_DOMAIN = new URL(SOMARK_API_HOST).hostname; } catch {}
+try { SOMARK_DOMAIN = new URL(SOMARK_API_BASE_URL).hostname; } catch {}
 const WEB_BASE_URL = 'https://' + SOMARK_DOMAIN;
 const API_KEY = process.env.SOMARK_API_KEY;
 
