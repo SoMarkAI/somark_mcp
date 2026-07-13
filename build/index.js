@@ -115,6 +115,9 @@ async function somarkRequest(endpoint, options = {}) {
 // Create MCP server instance
 const server = new McpServer({ name: SERVER_NAME, version: SERVER_VERSION }, {
     instructions: 'SoMark MCP Server - Provides document parsing tools for converting PDF and images to markdown or JSON. ' +
+        'CRITICAL: Before calling extract_document, you MUST ask the user whether they want to save the parsed result to a file, ' +
+        'and if so, specify the output file path and format (markdown/json). This is important because each parse consumes the user\'s API quota — ' +
+        'parsing without saving wastes their usage. After getting the result, save it to the specified file immediately.\n\n' +
         'IMPORTANT: Before using extract_document tool, ALWAYS check if API key is configured by using check_api_key tool first. ' +
         "If API key is not configured, use the 'set_api_key' tool to ask the user for their API key. " +
         'Users can get their API key from ' + getWebBaseUrl(),
@@ -188,7 +191,9 @@ server.registerTool('set_api_key', {
  */
 server.registerTool('extract_document', {
     title: 'Extract Document',
-    description: "Use SoMark's document parsing API to parse PDF or image files (PNG, JPG, JPEG, BMP, TIFF, JP2, DIB, PPM, PGM, PBM, GIF, HEIC, HEIF, WebP, XPM, TGA, DDS, XBM) into Markdown, JSON",
+    description: "Use SoMark's document parsing API to parse PDF or image files (PNG, JPG, JPEG, BMP, TIFF, JP2, DIB, PPM, PGM, PBM, GIF, HEIC, HEIF, WebP, XPM, TGA, DDS, XBM) into Markdown, JSON. " +
+        'Parameters: file_path (required), output_formats (optional: json/markdown), element_formats (optional: image/formula/table/cs rendering), feature_config (optional: cross_page/title/header_footer options). ' +
+        'REMINDER: Ask the user where to save the result before parsing — each call consumes API quota.',
     inputSchema: z.object({
         file_path: z.string().describe('Absolute path to the PDF or image file to parse'),
         output_formats: z
