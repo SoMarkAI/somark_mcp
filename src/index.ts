@@ -23,17 +23,34 @@ const SERVER_VERSION = '1.0.1'
 const MAX_SYNC_FILE_SIZE_BYTES = 200 * 1024 * 1024
 
 /**
- * API host URL from SOMARK_API_BASE_URL env var.
+ * API base URL from SOMARK_API_BASE_URL env var.
  * - Default (mainland China): https://somark.cn/api/v1
  * - Outside mainland China: https://somark.ai/api/v1
  */
 function getApiBaseUrl(): string {
-    const value = (process.env.SOMARK_API_BASE_URL || '').trim()
-    if (value) {
-        // Normalize: remove trailing slash
-        return value.replace(/\/+$/, '')
+    const raw = (process.env.SOMARK_API_BASE_URL || '').trim()
+    // Use default if not set
+    if (!raw) {
+        return 'https://somark.cn/api/v1'
     }
-    return 'https://somark.cn/api/v1'
+    // Normalize: remove trailing slash
+    const normalized = raw.replace(/\/+$/, '')
+    // Validate the provided URL
+    try {
+        const url = new URL(normalized)
+        if (!['http:', 'https:'].includes(url.protocol)) {
+            throw new Error(`SOMARK_API_BASE_URL must use http or https protocol, got: ${url.protocol}`)
+        }
+        if (!url.hostname) {
+            throw new Error(`SOMARK_API_BASE_URL has no valid hostname: ${normalized}`)
+        }
+    } catch (e) {
+        if (e instanceof TypeError) {
+            throw new Error(`Invalid SOMARK_API_BASE_URL: "${raw}". Must be a valid HTTP/HTTPS URL (e.g., https://somark.cn/api/v1)`)
+        }
+        throw e
+    }
+    return normalized
 }
 
 /** Extract the domain from the API host (e.g., "somark.cn" from "https://somark.cn/api/v1"). */
@@ -50,20 +67,6 @@ function getDomain(): string {
 /** Web base URL (dashboard, API key page), derived from API host. */
 function getWebBaseUrl(): string {
     return 'https://' + getDomain()
-}
-
-/** Documentation base URL, derived from API host. */
-function getDocsBaseUrl(): string {
-    return 'https://docs.' + getDomain()
-}
-
-/** Purchase page URL, varying by region. */
-function getPurchaseUrl(): string {
-    const domain = getDomain()
-    if (domain === 'somark.ai') {
-        return 'https://somark.ai/studio/purchase'
-    }
-    return 'https://somark.cn/workbench/purchase'
 }
 
 const SOMARK_API_BASE = getApiBaseUrl()
@@ -90,7 +93,7 @@ function requireApiKey(): string {
  */
 function setApiKey(key: string): void {
     apiKey = key
-    console.log(`API key configured successfully.`)
+    console.error(`API key configured successfully.`)
 }
 
 /**
@@ -134,9 +137,9 @@ const server = new McpServer(
     {
         instructions:
             'SoMark MCP Server - Provides document parsing tools for converting PDF and images to markdown or JSON. ' +
-            'CRITICAL: Before calling extract_document, you MUST ask the user whether they want to save the parsed result to a file, ' +
-            'and if so, specify the output file path and format (markdown/json). This is important because each parse consumes the user\'s API quota — ' +
-            'parsing without saving wastes their usage. After getting the result, save it to the specified file immediately.\n\n' +
+            'Each parse consumes the user\'s API quota. Before calling extract_document: if the user has not explicitly specified an output target ' +
+            '(file path for saving), ask them where to save the result and in what format (markdown/json), then save it after receiving the result. ' +
+            'If the user explicitly asks you to summarize, answer questions, or process content without saving, proceed directly but remind them that quota will be consumed.\n\n' +
             'IMPORTANT: Before using extract_document tool, ALWAYS check if API key is configured by using check_api_key tool first. ' +
             "If API key is not configured, use the 'set_api_key' tool to ask the user for their API key. " +
             'Users can get their API key from ' + getWebBaseUrl(),
@@ -230,7 +233,7 @@ server.registerTool(
         description:
             "Use SoMark's document parsing API to parse PDF or image files (PNG, JPG, JPEG, BMP, TIFF, JP2, DIB, PPM, PGM, PBM, GIF, HEIC, HEIF, WebP, XPM, TGA, DDS, XBM) into Markdown, JSON. " +
             'Parameters: file_path (required), output_formats (optional: json/markdown), element_formats (optional: image/formula/table/cs rendering), feature_config (optional: cross_page/title/header_footer options). ' +
-            'REMINDER: Ask the user where to save the result before parsing — each call consumes API quota.',
+            'REMINDER: Each call consumes API quota. If the user has not specified an output file, ask where to save the result before parsing.',
         inputSchema: z.object({
             file_path: z.string().describe('Absolute path to the PDF or image file to parse'),
             output_formats: z
@@ -331,7 +334,7 @@ server.registerTool(
             // Read file as buffer
             const fileBuffer = fs.readFileSync(file_path)
 
-            console.log(`Processing file: ${fileName} (${(fileSize / 1024).toFixed(2)} KB)`)
+            console.error(`Processing file: ${fileName} (${(fileSize / 1024).toFixed(2)} KB)`)
 
             // Determine MIME type based on extension
             const mimeTypes: Record<string, string> = {
@@ -370,7 +373,7 @@ server.registerTool(
             formData.append('element_formats', JSON.stringify(normalizedElementFormats))
             formData.append('feature_config', JSON.stringify(normalizedFeatureConfig))
 
-            console.log(`Sending request to SoMark API...`)
+            console.error(`Sending request to SoMark API...`)
 
             // Make API request
             const response = await somarkRequest<{
@@ -494,6 +497,15 @@ server.registerTool(
 // ============================================
 
 async function main() {
+    // Validate SOMARK_API_BASE_URL on startup (fail early if invalid)
+    try {
+        getApiBaseUrl()
+    } catch (e) {
+        const message = e instanceof Error ? e.message : String(e)
+        console.error('❌ ' + message)
+        process.exit(1)
+    }
+
     // Check for API key on startup
     if (!apiKey) {
         console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
@@ -514,11 +526,11 @@ async function main() {
     const transport = new StdioServerTransport()
     await server.connect(transport)
 
-    console.log(`SoMark MCP Server v${SERVER_VERSION} started.`)
-    console.log(`Available tools:`)
-    console.log(`  - check_api_key: Check if API key is configured`)
-    console.log(`  - set_api_key: Configure your SoMark API key`)
-    console.log(`  - extract_document: Parse PDF/images to markdown/JSON`)
+    console.error(`SoMark MCP Server v${SERVER_VERSION} started.`)
+    console.error(`Available tools:`)
+    console.error(`  - check_api_key: Check if API key is configured`)
+    console.error(`  - set_api_key: Configure your SoMark API key`)
+    console.error(`  - extract_document: Parse PDF/images to markdown/JSON`)
 }
 
 main().catch((error) => {

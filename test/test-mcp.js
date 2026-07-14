@@ -66,6 +66,8 @@ server.stdout.on('data', (data) => {
         const line = lines.shift()
         if (!line.trim()) continue
 
+        // Stdout pollution check: any non-empty non-JSON line means the server
+        // leaked a plain-text log to stdout, which will corrupt the MCP transport.
         try {
             const response = JSON.parse(line)
             console.log('📨 Response:', JSON.stringify(response, null, 2))
@@ -123,7 +125,11 @@ server.stdout.on('data', (data) => {
                 exitSuccessfully()
             }
         } catch (e) {
-            // Not complete JSON yet
+            // If the line is non-empty and not valid JSON, it's stdout pollution
+            if (line.trim()) {
+                exitWithError('Stdout pollution detected (non-JSON line from server)', line)
+            }
+            // Empty line — ignore (incomplete JSON buffer)
         }
     }
 
