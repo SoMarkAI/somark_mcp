@@ -26,8 +26,6 @@ const MAX_SYNC_FILE_SIZE_BYTES = 200 * 1024 * 1024
  * API host URL from SOMARK_API_BASE_URL env var.
  * - Default (mainland China): https://somark.cn/api/v1
  * - Outside mainland China: https://somark.ai/api/v1
- *
- * Similar to MiniMax's MINIMAX_API_HOST design.
  */
 function getApiBaseUrl(): string {
     const value = (process.env.SOMARK_API_BASE_URL || '').trim()
