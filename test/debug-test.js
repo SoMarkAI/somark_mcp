@@ -15,7 +15,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const SOMARK_API_BASE_URL = (process.env.SOMARK_API_BASE_URL || 'https://somark.cn/api/v1').trim().replace(/\/+$/, '');
-const SOMARK_API_BASE = SOMARK_API_BASE_URL;
+const DEFAULT_SOMARK_API_BASE_URL = SOMARK_API_BASE_URL;
 // Derive domain from API host
 let SOMARK_DOMAIN = 'somark.cn';
 try { SOMARK_DOMAIN = new URL(SOMARK_API_BASE_URL).hostname; } catch {}
@@ -111,9 +111,9 @@ async function testConnection() {
         
         // 5. Test API request
         console.log('\n5️⃣  Sending request to Somark API...');
-        console.log(`   Endpoint: ${SOMARK_API_BASE}/parse/sync`);
+        console.log(`   Endpoint: ${DEFAULT_SOMARK_API_BASE_URL}/parse/sync`);
         
-        const response = await fetch(`${SOMARK_API_BASE}/parse/sync`, {
+        const response = await fetch(`${DEFAULT_SOMARK_API_BASE_URL}/parse/sync`, {
             method: 'POST',
             body: formData,
         });

@@ -49,7 +49,7 @@ function getApiBaseUrl() {
     }
     return normalized;
 }
-/** Extract the domain from the API host (e.g., "somark.cn" from "https://somark.cn/api/v1"). */
+/** Extract the domain from the API base URL (e.g., "somark.cn" from "https://somark.cn/api/v1"). */
 function getDomain() {
     const host = getApiBaseUrl();
     try {
@@ -60,11 +60,11 @@ function getDomain() {
         return 'somark.cn';
     }
 }
-/** Web base URL (dashboard, API key page), derived from API host. */
+/** Web base URL (dashboard, API key page), derived from API base URL. */
 function getWebBaseUrl() {
     return 'https://' + getDomain();
 }
-const SOMARK_API_BASE = getApiBaseUrl();
+const DEFAULT_SOMARK_API_BASE_URL = getApiBaseUrl();
 // API Key storage (will be provided via environment variable)
 let apiKey = process.env.SOMARK_API_KEY || null;
 /**
@@ -98,7 +98,7 @@ async function somarkRequest(endpoint, options = {}) {
             ...options.headers,
         };
     try {
-        const response = await fetch(`${SOMARK_API_BASE}${endpoint}`, {
+        const response = await fetch(`${DEFAULT_SOMARK_API_BASE_URL}${endpoint}`, {
             ...options,
             headers,
         });
@@ -111,7 +111,7 @@ async function somarkRequest(endpoint, options = {}) {
     catch (error) {
         if (error instanceof TypeError && error.message === 'fetch failed') {
             // Network error
-            throw new Error(`fetch failed - Cannot reach SoMark API at ${SOMARK_API_BASE}${endpoint}. Check your network connection.`);
+            throw new Error(`fetch failed - Cannot reach SoMark API at ${DEFAULT_SOMARK_API_BASE_URL}${endpoint}. Check your network connection.`);
         }
         throw error;
     }
