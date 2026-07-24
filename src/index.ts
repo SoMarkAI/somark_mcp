@@ -69,6 +69,41 @@ function getWebBaseUrl(): string {
     return 'https://' + getDomain()
 }
 
+/**
+ * Collect image URLs from legacy result.imgs and current outputs.json blocks.
+ * The current API response may omit result.imgs entirely.
+ */
+function collectImageUrls(legacyImages: unknown, jsonOutput: unknown): string[] {
+    const imageUrls = new Set<string>()
+
+    const addUrl = (value: unknown) => {
+        if (typeof value === 'string' && value.trim()) {
+            imageUrls.add(value.trim())
+        }
+    }
+
+    if (Array.isArray(legacyImages)) {
+        legacyImages.forEach(addUrl)
+    }
+
+    const visit = (value: unknown) => {
+        if (Array.isArray(value)) {
+            value.forEach(visit)
+            return
+        }
+        if (!value || typeof value !== 'object') {
+            return
+        }
+
+        const record = value as Record<string, unknown>
+        addUrl(record.img_url)
+        Object.values(record).forEach(visit)
+    }
+
+    visit(jsonOutput)
+    return [...imageUrls]
+}
+
 const DEFAULT_SOMARK_API_BASE_URL = getApiBaseUrl()
 
 // API Key storage (will be provided via environment variable)
@@ -382,9 +417,9 @@ server.registerTool(
                 data: {
                     task_id: string
                     result: {
-                        file_name: string
-                        imgs: string[]
-                        outputs: {
+                        file_name?: string
+                        imgs?: unknown
+                        outputs?: {
                             markdown?: string
                             json?: unknown
                         }
@@ -407,7 +442,12 @@ server.registerTool(
                 throw new Error(`API error: ${data.error || message || 'Unknown error'}`)
             }
 
-            const { outputs } = data.result // 获取解析结果
+            if (!data?.result) {
+                throw new Error('API response is missing data.result')
+            }
+
+            const { result } = data
+            const outputs = result.outputs ?? {} // 获取解析结果
 
             const jsonContent = outputs.json
             const markdownContent = typeof outputs.markdown === 'string' && outputs.markdown.trim() ? outputs.markdown : ''
@@ -415,7 +455,7 @@ server.registerTool(
                 jsonContent !== undefined &&
                 jsonContent !== null &&
                 (Array.isArray(jsonContent) ? jsonContent.length > 0 : typeof jsonContent !== 'object' || Object.keys(jsonContent).length > 0)
-            const imageUrls = normalizedElementFormats.image === 'url' ? data.result.imgs.filter((img) => typeof img === 'string' && img.trim().length > 0) : []
+            const imageUrls = normalizedElementFormats.image === 'url' ? collectImageUrls(result.imgs, jsonContent) : []
 
             const extractedOutputs: Record<string, unknown> = {}
             if (hasJsonContent) {
@@ -428,13 +468,13 @@ server.registerTool(
             // Format response based on output format
             let responseText = `Document parsed successfully!\n\n`
             responseText += `- Task ID: ${data.task_id}\n`
-            responseText += `- File: ${data.result.file_name}\n`
+            responseText += `- File: ${result.file_name || fileName}\n`
 
             if (data.metadata.page_num) {
                 responseText += `- Pages: ${data.metadata.page_num}\n`
             }
-            if (Array.isArray(data.result.imgs) && data.result.imgs.length > 0) {
-                responseText += `- Images: ${data.result.imgs.length}\n`
+            if (imageUrls.length > 0) {
+                responseText += `- Images: ${imageUrls.length}\n`
             }
             if (imageUrls.length > 0) {
                 responseText += `- Image URLs:\n${imageUrls.map((u) => `  - ${u}`).join('\n')}\n`
