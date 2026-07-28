@@ -14,7 +14,12 @@ import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const SOMARK_API_BASE = "https://somark.tech/api/v1";
+const SOMARK_API_BASE_URL = (process.env.SOMARK_API_BASE_URL || 'https://somark.cn/api/v1').trim().replace(/\/+$/, '');
+const DEFAULT_SOMARK_API_BASE_URL = SOMARK_API_BASE_URL;
+// Derive domain from API host
+let SOMARK_DOMAIN = 'somark.cn';
+try { SOMARK_DOMAIN = new URL(SOMARK_API_BASE_URL).hostname; } catch {}
+const WEB_BASE_URL = 'https://' + SOMARK_DOMAIN;
 const API_KEY = process.env.SOMARK_API_KEY;
 
 async function testConnection() {
@@ -33,10 +38,10 @@ async function testConnection() {
     // 2. Test network connectivity
     console.log('\n2️⃣  Testing network connectivity...');
     try {
-        const response = await fetch('https://somark.tech/');
-        console.log(`✅ Can reach somark.tech (Status: ${response.status})`);
+        const response = await fetch(WEB_BASE_URL + '/');
+        console.log(`✅ Can reach ${WEB_BASE_URL} (Status: ${response.status})`);
     } catch (error) {
-        console.error('❌ Cannot reach somark.tech');
+        console.error('❌ Cannot reach ' + WEB_BASE_URL);
         console.error('   Error:', error.message);
         console.log('   Please check your internet connection');
         process.exit(1);
@@ -106,9 +111,9 @@ async function testConnection() {
         
         // 5. Test API request
         console.log('\n5️⃣  Sending request to Somark API...');
-        console.log(`   Endpoint: ${SOMARK_API_BASE}/parse/sync`);
+        console.log(`   Endpoint: ${DEFAULT_SOMARK_API_BASE_URL}/parse/sync`);
         
-        const response = await fetch(`${SOMARK_API_BASE}/parse/sync`, {
+        const response = await fetch(`${DEFAULT_SOMARK_API_BASE_URL}/parse/sync`, {
             method: 'POST',
             body: formData,
         });

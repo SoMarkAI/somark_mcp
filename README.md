@@ -6,7 +6,12 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server for **
 
 ## Quick Start
 
-**1. Get your API Key** → [somark.tech/workbench/apikey](https://somark.tech/workbench/apikey)
+**1. Get your API Key**
+   - Mainland China (中国大陆): [somark.cn/workbench/apikey](https://somark.cn/workbench/apikey)
+   - Outside mainland China (including Taiwan, China; Hong Kong, China; Macau, China): [somark.ai/workbench/apikey](https://somark.ai/workbench/apikey)
+   - Purchase an API plan:
+     - Mainland China: [somark.cn/workbench/purchase](https://somark.cn/workbench/purchase)
+     - Global: [somark.ai/studio/purchase](https://somark.ai/studio/purchase)
 
 **2. Add the following to your MCP client configuration** (Claude Desktop, VS Code, Cursor, etc.):
 
@@ -17,7 +22,8 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server for **
             "command": "npx",
             "args": ["-y", "somark-mcp"],
             "env": {
-                "SOMARK_API_KEY": "your-api-key-here"
+                "SOMARK_API_KEY": "your-api-key-here",
+                "SOMARK_API_BASE_URL": "https://somark.cn/api/v1"
             }
         }
     }
@@ -25,6 +31,22 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server for **
 ```
 
 **3. Done!** Ask your AI assistant to parse any PDF or image file.
+
+## API Base URL Configuration
+
+Set the `SOMARK_API_BASE_URL` environment variable to choose the server region:
+
+| Region                                                            | `SOMARK_API_BASE_URL`                |
+| ----------------------------------------------------------------- | ------------------------------------ |
+| Mainland China (default)                                          | `https://somark.cn/api/v1`           |
+| Outside mainland China (including Taiwan, China; Hong Kong, China; Macau, China) | `https://somark.ai/api/v1`           |
+
+The server automatically derives the web, docs, and purchase URLs from `SOMARK_API_BASE_URL`:
+
+| Domain        | API Base               | Web                      | Docs                         | Purchase                                    |
+| ------------- | ---------------------- | ------------------------ | ---------------------------- | ------------------------------------------- |
+| `somark.cn`   | `https://somark.cn/api/v1` | `https://somark.cn`  | `https://docs.somark.cn`  | [somark.cn/workbench/purchase](https://somark.cn/workbench/purchase) |
+| `somark.ai`   | `https://somark.ai/api/v1` | `https://somark.ai`  | `https://docs.somark.ai`  | [somark.ai/studio/purchase](https://somark.ai/studio/purchase) |
 
 ## Available Tools
 
@@ -38,7 +60,7 @@ Set or update the SoMark API key at runtime (useful when the environment variabl
 
 | Parameter | Type   | Required | Description                                                                  |
 | --------- | ------ | -------- | ---------------------------------------------------------------------------- |
-| `api_key` | string | Yes      | Your SoMark API key from [somark.tech](https://somark.tech/workbench/apikey) |
+| `api_key` | string | Yes      | Your SoMark API key from [somark.cn](https://somark.cn/workbench/apikey) (mainland China) or [somark.ai](https://somark.ai/workbench/apikey) (outside mainland China, including Taiwan, China; Hong Kong, China; Macau, China) |
 
 ### `extract_document`
 
@@ -124,7 +146,7 @@ pnpm test:api         # API connection test
 | Problem                  | Solution                                                                                                            |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------- |
 | "API key not configured" | Add `SOMARK_API_KEY` to your MCP client config, or use the `set_api_key` tool                                       |
-| Connection issues        | Check that your API key is valid and [somark.tech](https://somark.tech) is accessible                               |
+| Connection issues        | Check that your API key is valid and [somark.cn](https://somark.cn) / [somark.ai](https://somark.ai) (depending on region) is accessible. Set `SOMARK_API_BASE_URL=https://somark.ai/api/v1` for outside mainland China (including Taiwan, China; Hong Kong, China; Macau, China). |
 | Unsupported file format  | Supports PDF, PNG, JPG, JPEG, BMP, TIFF, JP2, DIB, PPM, PGM, PBM, GIF, HEIC, HEIF, WebP, XPM, TGA, DDS, XBM formats |
 
 ## License
